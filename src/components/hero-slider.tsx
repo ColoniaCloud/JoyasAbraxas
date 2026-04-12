@@ -29,7 +29,7 @@ export default function HeroSlider({ slides }: HeroSliderProps) {
       if (isTransitioning || total === 0) return;
       setIsTransitioning(true);
       setCurrent((index + total) % total);
-      setTimeout(() => setIsTransitioning(false), 600);
+      setTimeout(() => setIsTransitioning(false), 900);
     },
     [isTransitioning, total]
   );
@@ -39,20 +39,20 @@ export default function HeroSlider({ slides }: HeroSliderProps) {
 
   useEffect(() => {
     if (total <= 1) return;
-    const timer = setInterval(next, 6000);
+    const timer = setInterval(next, 9000);
     return () => clearInterval(timer);
   }, [next, total]);
 
   if (total === 0) return null;
 
   return (
-    <section className="relative h-[50vh] min-h-[320px] w-full overflow-hidden bg-black md:h-[60vh] md:min-h-[400px]">
+    <section className="relative h-[70vh] min-h-[480px] w-full overflow-hidden bg-black md:h-[60vh] md:min-h-[400px]">
       {/* Background images */}
       {slides.map((slide, i) => (
         <div
           key={slide.image}
           className={cn(
-            "absolute inset-0 transition-opacity duration-700 ease-in-out",
+            "absolute inset-0 transition-opacity duration-1000 ease-in-out",
             i === current ? "opacity-100" : "opacity-0"
           )}
         >
@@ -96,29 +96,29 @@ export default function HeroSlider({ slides }: HeroSliderProps) {
         </div>
       </div>
 
-      {/* Navigation arrows */}
+      {/* Navigation arrows + Dots */}
       {total > 1 && (
-        <>
+        <div className="absolute bottom-8 right-6 z-20 flex items-center gap-4 md:right-10">
           <button
             onClick={prev}
-            className="absolute left-4 top-1/2 z-20 flex size-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-white/20 bg-black/30 text-white backdrop-blur-sm transition-all hover:border-white/40 hover:bg-black/50 md:left-8"
+            className="flex size-11 cursor-pointer items-center justify-center rounded-full border border-white/20 bg-black/30 text-white backdrop-blur-sm transition-all hover:border-white/40 hover:bg-black/50"
             aria-label="Anterior"
           >
             <ChevronLeft size={20} strokeWidth={1.5} />
           </button>
           <button
             onClick={next}
-            className="absolute right-4 top-1/2 z-20 flex size-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-white/20 bg-black/30 text-white backdrop-blur-sm transition-all hover:border-white/40 hover:bg-black/50 md:right-8"
+            className="flex size-11 cursor-pointer items-center justify-center rounded-full border border-white/20 bg-black/30 text-white backdrop-blur-sm transition-all hover:border-white/40 hover:bg-black/50"
             aria-label="Siguiente"
           >
             <ChevronRight size={20} strokeWidth={1.5} />
           </button>
-        </>
+        </div>
       )}
 
       {/* Dots */}
       {total > 1 && (
-        <div className="absolute bottom-8 left-1/2 z-20 flex -translate-x-1/2 gap-2.5">
+        <div className="absolute bottom-8 left-6 z-20 flex gap-2.5 md:left-10">
           {slides.map((_, i) => (
             <button
               key={i}

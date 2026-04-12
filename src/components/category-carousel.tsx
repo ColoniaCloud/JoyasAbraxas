@@ -19,7 +19,7 @@ export default function CategoryCarousel({ products, index = 0 }: CategoryCarous
 
   // Alternating direction: even → left, odd → right
   const animationName = index % 2 === 0 ? "auto-scroll-left" : "auto-scroll-right";
-  const duration = `${Math.max(products.length * 3.5, 24)}s`;
+  const duration = `${Math.max(products.length * 6, 40)}s`;
 
   // Duplicate list for seamless infinite loop
   const looped = [...products, ...products];

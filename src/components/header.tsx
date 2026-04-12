@@ -118,7 +118,7 @@ export default function Header({ categories = [] }: HeaderProps) {
                       {categories.map((cat) => (
                         <Link
                           key={cat.id}
-                          href={`/categorias/${cat.id}`}
+                          href={`/categorias/${cat.slug}`}
                           onClick={() => setMegaOpen(false)}
                           className="group flex flex-col overflow-hidden rounded-xl border border-[var(--color-line)] bg-[var(--color-panel)] transition-all hover:border-[var(--color-brand)]/40 hover:shadow-md"
                         >
@@ -248,7 +248,7 @@ export default function Header({ categories = [] }: HeaderProps) {
                   {categories.map((cat) => (
                     <li key={cat.id}>
                       <Link
-                        href={`/categorias/${cat.id}`}
+                        href={`/categorias/${cat.slug}`}
                         onClick={() => { setMobileOpen(false); setMobileCatsOpen(false); }}
                         className="flex items-center justify-between rounded-lg px-3 py-2 text-[12px] text-[var(--color-ink)] transition-colors hover:bg-[var(--color-line)]/50 hover:text-[var(--color-brand)]"
                       >

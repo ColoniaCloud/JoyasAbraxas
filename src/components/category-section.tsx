@@ -103,7 +103,7 @@ export default function CategorySection({ cat, products, index }: Props) {
           )}
 
           <Link
-            href={`/categorias/${cat.id}`}
+            href={`/categorias/${cat.slug}`}
             className="inline-flex items-center gap-2 border-b border-white/30 pb-0.5 text-[12px] font-semibold uppercase tracking-[0.18em] text-white transition-all duration-300 hover:border-white hover:gap-3"
             style={{
               transitionDelay: "330ms",

@@ -1,38 +1,69 @@
 "use client";
 
 import { useCart } from "@/lib/cart-context";
+import type { CheckoutRequest } from "@/lib/types/checkout";
 import Image from "next/image";
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 
 export default function CheckoutPage() {
   const { items, totalItems, totalPrice, clearCart } = useCart();
-  const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    // TODO: Integrar con WooCommerce Orders API
-    clearCart();
-    setSubmitted(true);
-  }
+    setLoading(true);
+    setError("");
 
-  if (submitted) {
-    return (
-      <main className="mx-auto max-w-[680px] px-4 py-8 text-center">
-        <section className="rounded-2xl border border-[var(--color-line)] bg-[var(--color-panel)] p-8">
-          <h1 className="mt-0 mb-2">¡Gracias por tu pedido!</h1>
-          <p className="text-[var(--color-muted)]">
-            Hemos recibido tu orden. Te contactaremos pronto.
-          </p>
-          <Link
-            href="/productos"
-            className="mt-4 inline-flex items-center justify-center rounded-full bg-[var(--color-brand)] px-5 py-2.5 font-bold text-[#f6fffb] hover:bg-[var(--color-brand-strong)]"
-          >
-            Seguir comprando
-          </Link>
-        </section>
-      </main>
-    );
+    const form = new FormData(e.currentTarget);
+
+    const payload: CheckoutRequest = {
+      customer: {
+        firstName: String(form.get("firstName") || ""),
+        lastName: String(form.get("lastName") || ""),
+        email: String(form.get("email") || ""),
+        phone: String(form.get("phone") || ""),
+        address: String(form.get("address") || ""),
+        city: String(form.get("city") || ""),
+        postalCode: String(form.get("postalCode") || ""),
+        notes: String(form.get("notes") || ""),
+      },
+      items: items.map((item) => ({
+        productId: item.product.id,
+        quantity: item.quantity,
+        price: item.product.price,
+        name: item.product.name,
+      })),
+    };
+
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Error procesando el pedido");
+      }
+
+      // Guardar orderId para la página de resultado
+      sessionStorage.setItem("abraxas_order_id", String(data.orderId));
+
+      // Limpiar carrito antes de redirigir
+      clearCart();
+
+      // Redirigir a MercadoPago
+      window.location.href = data.initPoint;
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Error inesperado. Intenta de nuevo."
+      );
+      setLoading(false);
+    }
   }
 
   if (items.length === 0) {
@@ -40,7 +71,7 @@ export default function CheckoutPage() {
       <main className="mx-auto max-w-[680px] px-4 py-8 text-center">
         <section className="rounded-2xl border border-[var(--color-line)] bg-[var(--color-panel)] p-8">
           <h1 className="mt-0 mb-2">Checkout</h1>
-          <p className="text-[var(--color-muted)]">Tu carrito esta vacio.</p>
+          <p className="text-[var(--color-muted)]">Tu carrito está vacío.</p>
           <Link
             href="/productos"
             className="mt-4 inline-flex items-center justify-center rounded-full bg-[var(--color-brand)] px-5 py-2.5 font-bold text-[#f6fffb] hover:bg-[var(--color-brand-strong)]"
@@ -94,7 +125,7 @@ export default function CheckoutPage() {
               />
             </label>
             <label className="mt-3 grid gap-1.5 text-sm font-semibold">
-              Telefono
+              Teléfono
               <input
                 type="tel"
                 name="phone"
@@ -104,9 +135,9 @@ export default function CheckoutPage() {
           </section>
 
           <section className="rounded-2xl border border-[var(--color-line)] bg-[var(--color-panel)] p-5">
-            <h2 className="mt-0 mb-4 text-lg">Direccion de envio</h2>
+            <h2 className="mt-0 mb-4 text-lg">Dirección de envío</h2>
             <label className="grid gap-1.5 text-sm font-semibold">
-              Direccion
+              Dirección
               <input
                 type="text"
                 name="address"
@@ -125,7 +156,7 @@ export default function CheckoutPage() {
                 />
               </label>
               <label className="grid gap-1.5 text-sm font-semibold">
-                Codigo postal
+                Código postal
                 <input
                   type="text"
                   name="postalCode"
@@ -177,10 +208,17 @@ export default function CheckoutPage() {
           <button
             type="submit"
             form="checkout-form"
-            className="mt-4 w-full cursor-pointer rounded-[9px] border-0 bg-[var(--color-brand)] p-3 font-[inherit] font-bold text-[#f6fffb] transition-colors hover:bg-[var(--color-brand-strong)]"
+            disabled={loading}
+            className="mt-4 w-full cursor-pointer rounded-[9px] border-0 bg-[var(--color-brand)] p-3 font-[inherit] font-bold text-[#f6fffb] transition-colors hover:bg-[var(--color-brand-strong)] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Confirmar pedido
+            {loading ? "Procesando..." : "Pagar con MercadoPago"}
           </button>
+
+          {error && (
+            <p className="mt-3 rounded-lg border border-red-900/40 bg-red-950/40 p-3 text-sm text-red-400">
+              {error}
+            </p>
+          )}
         </aside>
       </div>
     </main>

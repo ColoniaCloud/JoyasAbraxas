@@ -2,18 +2,33 @@ import type { Metadata } from "next";
 import { fetchProducts } from "@/lib/wp";
 import type { WPProduct } from "@/lib/types";
 import Link from "next/link";
-import Image from "next/image";
+import ProductCard from "@/components/product-card";
+import Pagination from "@/components/pagination";
 
 export const metadata: Metadata = {
-  title: "Productos | Abraxas",
+  title: "Catálogo | Abraxas Joyería",
+  description: "Explora nuestro catálogo completo de joyería artesanal. Anillos, colgantes, caravanas y más.",
+  openGraph: {
+    title: "Catálogo | Abraxas Joyería",
+    description: "Explora nuestro catálogo completo de joyería artesanal.",
+  },
 };
 
-export default async function ProductosPage() {
+interface Props {
+  searchParams: Promise<{ pagina?: string }>;
+}
+
+export default async function ProductosPage({ searchParams }: Props) {
+  const { pagina } = await searchParams;
+  const currentPage = Math.max(1, parseInt(pagina ?? "1", 10) || 1);
   let products: WPProduct[] = [];
+  let totalPages = 1;
   let errorMessage = "";
 
   try {
-    products = await fetchProducts({ perPage: 16 });
+    const result = await fetchProducts({ perPage: 16, page: currentPage });
+    products = result.data;
+    totalPages = result.totalPages;
   } catch (error) {
     errorMessage =
       error instanceof Error
@@ -30,7 +45,7 @@ export default async function ProductosPage() {
         >
           Volver
         </Link>
-        <h1>Catalogo</h1>
+        <h1>Catálogo</h1>
       </div>
 
       {errorMessage && (
@@ -45,30 +60,11 @@ export default async function ProductosPage() {
 
       <section className="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-4">
         {products.map((product) => (
-          <Link
-            key={product.id}
-            href={`/productos/${product.slug}`}
-            className="overflow-hidden rounded-[14px] border border-[var(--color-line)] bg-[var(--color-panel)] transition-shadow hover:shadow-md"
-          >
-            <Image
-              src={product.images[0]?.src ?? "/favicon.svg"}
-              alt={product.images[0]?.alt || product.name}
-              width={400}
-              height={180}
-              className="h-[180px] w-full bg-[#1c1a18] object-cover"
-            />
-            <div className="p-4">
-              <h2 className="m-0 mb-1.5 text-base">{product.name}</h2>
-              <p className="m-0 font-bold">
-                {product.price ? `$${product.price}` : "Sin precio"}
-              </p>
-              <p className="mt-2 mb-0 text-sm text-[var(--color-muted)]">
-                Rating: {product.average_rating || "0"} ({product.rating_count})
-              </p>
-            </div>
-          </Link>
+          <ProductCard key={product.id} product={product} />
         ))}
       </section>
+
+      <Pagination currentPage={currentPage} totalPages={totalPages} basePath="/productos" />
     </main>
   );
 }

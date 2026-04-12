@@ -1,13 +1,16 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Geist } from "next/font/google";
+import { Geist, Cormorant_Garamond } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { CartProvider } from "@/lib/cart-context";
 import Header from "@/components/header";
+import Footer from "@/components/footer";
 import { fetchCategories } from "@/lib/wp";
 import type { WPCategory } from "@/lib/types";
+import { organizationJsonLd } from "@/lib/structured-data";
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+const cormorant = Cormorant_Garamond({subsets:['latin'],weight:['400','500','600','700'],variable:'--font-heading'});
 
 export const metadata: Metadata = {
   title: "Abraxas | Joyería de Alta Calidad",
@@ -31,13 +34,18 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang="es" className={cn("font-sans", geist.variable)}>
+    <html lang="es" className={cn("font-sans", geist.variable, cormorant.variable)}>
       <body>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd()) }}
+        />
         <CartProvider>
           <Header categories={categories} />
           <div className="pt-24">
             {children}
           </div>
+          <Footer />
         </CartProvider>
       </body>
     </html>

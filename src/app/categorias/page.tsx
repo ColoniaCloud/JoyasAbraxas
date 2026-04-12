@@ -5,7 +5,12 @@ import Link from "next/link";
 import Image from "next/image";
 
 export const metadata: Metadata = {
-  title: "Categorias | Abraxas",
+  title: "Categorías | Abraxas Joyería",
+  description: "Explora nuestras colecciones de joyería artesanal. Anillos, colgantes, caravanas y más.",
+  openGraph: {
+    title: "Categorías | Abraxas Joyería",
+    description: "Explora nuestras colecciones de joyería artesanal.",
+  },
 };
 
 export default async function CategoriasPage() {
@@ -17,7 +22,7 @@ export default async function CategoriasPage() {
     // Filter out "Uncategorized"
     categories = categories.filter((c) => c.slug !== "uncategorized");
   } catch (e) {
-    error = e instanceof Error ? e.message : "No se pudieron cargar las categorias";
+    error = e instanceof Error ? e.message : "No se pudieron cargar las categorías";
   }
 
   return (
@@ -26,7 +31,7 @@ export default async function CategoriasPage() {
         <Link href="/productos" className="font-semibold text-[var(--color-brand-strong)]">
           Volver
         </Link>
-        <h1>Categorias</h1>
+        <h1>Categorías</h1>
       </div>
 
       {error && (
@@ -36,14 +41,14 @@ export default async function CategoriasPage() {
       )}
 
       {!error && categories.length === 0 && (
-        <p className="text-[var(--color-muted)]">No hay categorias todavia.</p>
+        <p className="text-[var(--color-muted)]">No hay categorías todavía.</p>
       )}
 
       <section className="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-4">
         {categories.map((cat) => (
           <Link
             key={cat.id}
-            href={`/categorias/${cat.id}`}
+            href={`/categorias/${cat.slug}`}
             className="overflow-hidden rounded-[14px] border border-[var(--color-line)] bg-[var(--color-panel)] transition-shadow hover:shadow-md"
           >
             {cat.image ? (

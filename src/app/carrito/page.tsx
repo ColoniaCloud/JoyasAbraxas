@@ -16,7 +16,7 @@ export default function CarritoPage() {
 
       {items.length === 0 ? (
         <section className="rounded-2xl border border-[var(--color-line)] bg-[var(--color-panel)] p-8 text-center">
-          <p className="text-lg text-[var(--color-muted)]">Tu carrito esta vacio.</p>
+          <p className="text-lg text-[var(--color-muted)]">Tu carrito está vacío.</p>
           <Link
             href="/productos"
             className="mt-4 inline-flex items-center justify-center rounded-full bg-[var(--color-brand)] px-5 py-2.5 font-bold text-[#f6fffb] hover:bg-[var(--color-brand-strong)]"
@@ -43,7 +43,7 @@ export default function CarritoPage() {
                 <div className="flex flex-1 flex-col justify-between">
                   <div>
                     <Link
-                      href={`/productos/${item.product.id}`}
+                      href={`/productos/${item.product.slug}`}
                       className="font-semibold hover:text-[var(--color-brand-strong)]"
                     >
                       {item.product.name}

@@ -36,7 +36,7 @@ function buildSlides(categories: WPCategory[]): HeroSlide[] {
         image: data.image,
         title: cat?.name ?? slug.charAt(0).toUpperCase() + slug.slice(1),
         tagline: data.tagline,
-        href: cat ? `/categorias/${cat.id}` : "/categorias",
+        href: cat ? `/categorias/${cat.slug}` : "/categorias",
         buttonLabel: data.buttonLabel,
       },
     ];
@@ -60,7 +60,7 @@ export default async function HomePage() {
   // Fetch products for each category in parallel
   const categoryProducts = await Promise.all(
     categories.map((cat) =>
-      fetchProducts({ perPage: 12, category: cat.id }).catch(() => [] as WPProduct[])
+      fetchProducts({ perPage: 12, category: cat.id }).then(r => r.data).catch(() => [] as WPProduct[])
     )
   );
 

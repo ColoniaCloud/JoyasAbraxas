@@ -1,8 +1,11 @@
 import { fetchProductBySlug, fetchProductReviews } from "@/lib/wp";
+import { sanitize } from "@/lib/sanitize";
+import { productJsonLd, breadcrumbJsonLd } from "@/lib/structured-data";
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import AddToCartButton from "@/components/add-to-cart-button";
+import Breadcrumbs from "@/components/breadcrumbs";
+import ProductGallery from "@/components/product-gallery";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -12,7 +15,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   try {
     const product = await fetchProductBySlug(slug);
-    return { title: `${product.name} | Abraxas` };
+    const description = product.short_description
+      ?.replace(/<[^>]+>/g, "")
+      .slice(0, 160) || `${product.name} — Joyería artesanal Abraxas`;
+    return {
+      title: `${product.name} | Abraxas Joyería`,
+      description,
+      openGraph: {
+        title: product.name,
+        description,
+        images: product.images[0]?.src ? [{ url: product.images[0].src }] : [],
+      },
+    };
   } catch {
     return { title: "Producto | Abraxas" };
   }
@@ -35,7 +49,7 @@ export default async function ProductoDetailPage({ params }: Props) {
     return (
       <main className="mx-auto max-w-[1080px] px-4 py-8">
         <Link href="/productos" className="font-semibold text-[var(--color-brand-strong)]">
-          Volver al catalogo
+          Volver al catálogo
         </Link>
         <p className="my-4 rounded-lg border border-red-900/40 bg-red-950/40 p-3">
           {error || "Producto no encontrado"}
@@ -44,43 +58,37 @@ export default async function ProductoDetailPage({ params }: Props) {
     );
   }
 
-  const mainImage = product.images[0];
   const hasDiscount = product.sale_price && product.regular_price && product.sale_price !== product.regular_price;
 
   return (
     <main className="mx-auto max-w-[1080px] px-4 py-8">
-      <Link href="/productos" className="mb-6 inline-block font-semibold text-[var(--color-brand-strong)]">
-        Volver al catalogo
-      </Link>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd(product)) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            breadcrumbJsonLd([
+              { name: "Inicio", href: "/" },
+              { name: "Catálogo", href: "/productos" },
+              { name: product.name, href: `/productos/${product.slug}` },
+            ])
+          ),
+        }}
+      />
+      <Breadcrumbs
+        items={[
+          { label: "Inicio", href: "/" },
+          { label: "Catálogo", href: "/productos" },
+          { label: product.name },
+        ]}
+      />
 
       <div className="grid gap-8 md:grid-cols-2">
         {/* Images */}
-        <div className="flex flex-col gap-3">
-          {mainImage && (
-            <Image
-              src={mainImage.src}
-              alt={mainImage.alt || product.name}
-              width={600}
-              height={600}
-              className="w-full rounded-2xl bg-[#1c1a18] object-cover"
-              priority
-            />
-          )}
-          {product.images.length > 1 && (
-            <div className="flex gap-2 overflow-x-auto">
-              {product.images.slice(1).map((img) => (
-                <Image
-                  key={img.id}
-                  src={img.src}
-                  alt={img.alt || product.name}
-                  width={100}
-                  height={100}
-                  className="size-20 rounded-lg bg-[#1c1a18] object-cover"
-                />
-              ))}
-            </div>
-          )}
-        </div>
+        <ProductGallery images={product.images} productName={product.name} />
 
         {/* Info */}
         <div>
@@ -91,7 +99,7 @@ export default async function ProductoDetailPage({ params }: Props) {
               {product.categories.map((cat) => (
                 <Link
                   key={cat.id}
-                  href={`/categorias/${cat.id}`}
+                  href={`/categorias/${cat.slug}`}
                   className="rounded-full bg-[var(--color-line)] px-2.5 py-0.5 text-xs font-medium text-[var(--color-muted)]"
                 >
                   {cat.name}
@@ -120,7 +128,7 @@ export default async function ProductoDetailPage({ params }: Props) {
           {product.short_description && (
             <div
               className="mb-4 text-[var(--color-muted)] [&_p]:m-0"
-              dangerouslySetInnerHTML={{ __html: product.short_description }}
+              dangerouslySetInnerHTML={{ __html: sanitize(product.short_description) }}
             />
           )}
 
@@ -146,10 +154,10 @@ export default async function ProductoDetailPage({ params }: Props) {
       {/* Description */}
       {product.description && (
         <section className="mt-10 rounded-2xl border border-[var(--color-line)] bg-[var(--color-panel)] p-6">
-          <h2 className="mt-0 mb-4">Descripcion</h2>
+          <h2 className="mt-0 mb-4">Descripción</h2>
           <div
             className="prose max-w-none text-[var(--color-muted)] [&_p]:mb-3"
-            dangerouslySetInnerHTML={{ __html: product.description }}
+            dangerouslySetInnerHTML={{ __html: sanitize(product.description) }}
           />
         </section>
       )}
@@ -158,7 +166,7 @@ export default async function ProductoDetailPage({ params }: Props) {
       {reviews && reviews.length > 0 && (
         <section className="mt-8">
           <h2 className="mb-4">
-            Resenas ({reviews.length})
+            Reseñas ({reviews.length})
           </h2>
           <div className="grid gap-3 sm:grid-cols-2">
             {reviews.map((review) => (

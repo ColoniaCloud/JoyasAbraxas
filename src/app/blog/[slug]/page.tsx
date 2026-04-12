@@ -1,7 +1,10 @@
 import { fetchPost } from "@/lib/wp";
+import { sanitize } from "@/lib/sanitize";
+import { blogPostJsonLd, breadcrumbJsonLd } from "@/lib/structured-data";
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
+import Breadcrumbs from "@/components/breadcrumbs";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -11,13 +14,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   try {
     const post = await fetchPost(slug);
-    if (!post) return { title: "Articulo | Abraxas" };
+    if (!post) return { title: "Artículo | Abraxas" };
     return {
       title: `${post.title.rendered} | Abraxas`,
       description: post.excerpt.rendered.replace(/<[^>]+>/g, "").slice(0, 160),
     };
   } catch {
-    return { title: "Articulo | Abraxas" };
+    return { title: "Artículo | Abraxas" };
   }
 }
 
@@ -29,7 +32,7 @@ export default async function BlogPostPage({ params }: Props) {
   try {
     post = await fetchPost(slug);
   } catch (e) {
-    error = e instanceof Error ? e.message : "No se pudo cargar el articulo";
+    error = e instanceof Error ? e.message : "No se pudo cargar el artículo";
   }
 
   if (error || !post) {
@@ -39,7 +42,7 @@ export default async function BlogPostPage({ params }: Props) {
           Volver al blog
         </Link>
         <p className="my-4 rounded-lg border border-red-900/40 bg-red-950/40 p-3">
-          {error || "Articulo no encontrado"}
+          {error || "Artículo no encontrado"}
         </p>
       </main>
     );
@@ -57,9 +60,29 @@ export default async function BlogPostPage({ params }: Props) {
 
   return (
     <main className="mx-auto max-w-[720px] px-4 py-8">
-      <Link href="/blog" className="mb-6 inline-block font-semibold text-[var(--color-brand-strong)]">
-        Volver al blog
-      </Link>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(blogPostJsonLd(post)) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            breadcrumbJsonLd([
+              { name: "Inicio", href: "/" },
+              { name: "Blog", href: "/blog" },
+              { name: post.title.rendered.replace(/<[^>]+>/g, ""), href: `/blog/${post.slug}` },
+            ])
+          ),
+        }}
+      />
+      <Breadcrumbs
+        items={[
+          { label: "Inicio", href: "/" },
+          { label: "Blog", href: "/blog" },
+          { label: post.title.rendered.replace(/<[^>]+>/g, "") },
+        ]}
+      />
 
       {featuredImage && (
         <Image
@@ -71,7 +94,7 @@ export default async function BlogPostPage({ params }: Props) {
         />
       )}
 
-      <h1 className="mb-2" dangerouslySetInnerHTML={{ __html: post.title.rendered }} />
+      <h1 className="mb-2" dangerouslySetInnerHTML={{ __html: sanitize(post.title.rendered) }} />
 
       <p className="mb-6 text-sm text-[var(--color-muted)]">
         Por {author} · {date}
@@ -79,7 +102,7 @@ export default async function BlogPostPage({ params }: Props) {
 
       <article
         className="prose prose-neutral max-w-none"
-        dangerouslySetInnerHTML={{ __html: post.content.rendered }}
+        dangerouslySetInnerHTML={{ __html: sanitize(post.content.rendered) }}
       />
     </main>
   );

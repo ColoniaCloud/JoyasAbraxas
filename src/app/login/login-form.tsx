@@ -2,10 +2,8 @@
 
 import { useState, type FormEvent } from "react";
 
-export default function LoginForm({ endpoint }: { endpoint: string }) {
+export default function LoginForm() {
   const [status, setStatus] = useState("");
-
-  const misconfigured = !endpoint || endpoint.includes("undefined");
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -16,7 +14,7 @@ export default function LoginForm({ endpoint }: { endpoint: string }) {
     setStatus("Validando credenciales...");
 
     try {
-      const response = await fetch(endpoint, {
+      const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
@@ -25,7 +23,7 @@ export default function LoginForm({ endpoint }: { endpoint: string }) {
       const body = await response.json();
 
       if (!response.ok || !body?.token) {
-        throw new Error(body?.message || "Credenciales invalidas");
+        throw new Error(body?.message || "Credenciales inválidas");
       }
 
       localStorage.setItem("abraxas_token", body.token);
@@ -37,12 +35,12 @@ export default function LoginForm({ endpoint }: { endpoint: string }) {
         })
       );
 
-      setStatus(`Sesion iniciada para ${body.user_display_name}`);
+      setStatus(`Sesión iniciada para ${body.user_display_name}`);
     } catch (error) {
       setStatus(
         error instanceof Error
           ? error.message
-          : "No fue posible iniciar sesion"
+          : "No fue posible iniciar sesión"
       );
     }
   }
@@ -62,7 +60,7 @@ export default function LoginForm({ endpoint }: { endpoint: string }) {
         </label>
 
         <label className="grid gap-1.5 text-[0.95rem] font-semibold">
-          Contrasena
+          Contraseña
           <input
             type="password"
             name="password"
@@ -81,9 +79,7 @@ export default function LoginForm({ endpoint }: { endpoint: string }) {
       </form>
 
       <p className="mt-3 min-h-5 font-semibold" aria-live="polite">
-        {misconfigured
-          ? "Configura NEXT_PUBLIC_WP_URL o NEXT_PUBLIC_WP_AUTH_ENDPOINT en tu .env"
-          : status}
+        {status}
       </p>
     </>
   );

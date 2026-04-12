@@ -39,13 +39,13 @@ export default function MiCuentaPage() {
         <section className="rounded-2xl border border-[var(--color-line)] bg-[var(--color-panel)] p-6 text-center">
           <h1 className="mt-0 mb-2">Mi cuenta</h1>
           <p className="text-[var(--color-muted)]">
-            No has iniciado sesion.
+            No has iniciado sesión.
           </p>
           <Link
             href="/login"
             className="mt-4 inline-flex items-center justify-center rounded-full bg-[var(--color-brand)] px-5 py-2.5 font-bold text-[#f6fffb] hover:bg-[var(--color-brand-strong)]"
           >
-            Iniciar sesion
+            Iniciar sesión
           </Link>
         </section>
       </main>
@@ -82,7 +82,7 @@ export default function MiCuentaPage() {
             href="/productos"
             className="rounded-[14px] border border-[var(--color-line)] bg-[var(--color-background)] p-4 transition-colors hover:bg-[var(--color-line)]"
           >
-            <h3 className="m-0 mb-1">Catalogo</h3>
+            <h3 className="m-0 mb-1">Catálogo</h3>
             <p className="m-0 text-sm text-[var(--color-muted)]">Explorar productos</p>
           </Link>
         </div>
@@ -91,7 +91,7 @@ export default function MiCuentaPage() {
           onClick={handleLogout}
           className="mt-6 cursor-pointer rounded-[9px] border border-red-900/40 bg-red-950/40 px-4 py-2 font-semibold text-red-700 transition-colors hover:bg-red-900/30"
         >
-          Cerrar sesion
+          Cerrar sesión
         </button>
       </section>
     </main>

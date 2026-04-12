@@ -5,7 +5,8 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "**",
+        hostname: "api.joyasabraxas.com",
+        pathname: "/wp-content/uploads/**",
       },
     ],
   },
