@@ -27,7 +27,7 @@ export default function MercadoPagoBrick({ amount, onSubmit, onError }: Props) {
         },
       }}
       onSubmit={async ({ formData }) => {
-        await onSubmit(formData as Record<string, unknown>);
+        await onSubmit(formData as unknown as Record<string, unknown>);
       }}
       onError={onError}
     />
