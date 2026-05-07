@@ -10,16 +10,19 @@ const MP_TOKEN = process.env.MP_ACCESS_TOKEN!;
 export async function createWCOrder(
 	customer: CheckoutFormData,
 	items: { productId: number; quantity: number }[],
+	paymentMethod: "mercadopago" | "bank_transfer" = "mercadopago",
 ) {
 	const url = new URL("/wp-json/wc/v3/orders", WP_URL);
 	url.searchParams.set("consumer_key", WC_KEY);
 	url.searchParams.set("consumer_secret", WC_SECRET);
 
+	const isBankTransfer = paymentMethod === "bank_transfer";
+
 	const body = {
-		payment_method: "mercadopago",
-		payment_method_title: "MercadoPago",
+		payment_method: isBankTransfer ? "bacs" : "mercadopago",
+		payment_method_title: isBankTransfer ? "Transferencia Bancaria" : "MercadoPago",
 		set_paid: false,
-		status: "pending",
+		status: isBankTransfer ? "on-hold" : "pending",
 		billing: {
 			first_name: customer.firstName,
 			last_name: customer.lastName,
@@ -33,9 +36,9 @@ export async function createWCOrder(
 		shipping: {
 			first_name: customer.firstName,
 			last_name: customer.lastName,
-			address_1: customer.address,
-			city: customer.city,
-			postcode: customer.postalCode || "",
+			address_1: customer.shippingAddress || customer.address,
+			city: customer.shippingCity || customer.city,
+			postcode: customer.shippingPostalCode || customer.postalCode || "",
 			country: "UY",
 		},
 		line_items: items.map((item) => ({
@@ -109,6 +112,39 @@ export async function createMPPreference(
 	}
 
 	return res.json() as Promise<MPPreference>;
+}
+
+// ── MercadoPago Payments (Bricks) ──
+
+export async function processMPPayment(
+	orderId: number,
+	amount: number,
+	mpFormData: Record<string, unknown>,
+	customerEmail: string,
+): Promise<MPPayment> {
+	const siteUrl = process.env.NEXT_PUBLIC_SITE_URL!;
+	const res = await fetch("https://api.mercadopago.com/v1/payments", {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+			Authorization: `Bearer ${MP_TOKEN}`,
+			"X-Idempotency-Key": `${orderId}-${Date.now()}`,
+		},
+		body: JSON.stringify({
+			...mpFormData,
+			transaction_amount: amount,
+			external_reference: String(orderId),
+			notification_url: `${siteUrl}/api/webhooks/mercadopago`,
+			payer: { email: customerEmail },
+		}),
+	});
+
+	if (!res.ok) {
+		const error = await res.json().catch(() => ({})) as { message?: string };
+		throw new Error(error.message || `Error procesando pago: ${res.status}`);
+	}
+
+	return res.json() as Promise<MPPayment>;
 }
 
 // ── MercadoPago Payments (consulta) ──

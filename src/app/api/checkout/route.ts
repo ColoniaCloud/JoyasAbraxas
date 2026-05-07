@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { CheckoutRequest } from "@/lib/types/checkout";
-import { createWCOrder, createMPPreference } from "@/lib/services/checkout";
+import { createWCOrder, processMPPayment, updateWCOrderStatus } from "@/lib/services/checkout";
 
 export async function POST(request: Request) {
 	try {
@@ -28,30 +28,62 @@ export async function POST(request: Request) {
 			);
 		}
 
-		// 1. Crear pedido en WooCommerce (status: pending)
+		const paymentMethod = body.paymentMethod ?? "mercadopago";
+
+		// 1. Crear pedido en WooCommerce
 		const order = await createWCOrder(
 			body.customer,
 			body.items.map((item) => ({
 				productId: item.productId,
 				quantity: item.quantity,
 			})),
+			paymentMethod,
 		);
 
-		// 2. Crear preferencia de pago en MercadoPago
-		const preference = await createMPPreference(
+		// 2a. Transferencia bancaria: devolver directamente
+		if (paymentMethod === "bank_transfer") {
+			return NextResponse.json({
+				orderId: order.id,
+				method: "bank_transfer",
+			});
+		}
+
+		// 2b. MercadoPago Bricks: procesar pago con el token del brick
+		if (!body.mpFormData) {
+			return NextResponse.json(
+				{ error: "Faltan datos de pago de MercadoPago" },
+				{ status: 400 },
+			);
+		}
+
+		const totalAmount = body.items.reduce(
+			(sum, item) => sum + parseFloat(item.price) * item.quantity,
+			0,
+		);
+
+		const payment = await processMPPayment(
 			order.id,
-			body.items.map((item) => ({
-				name: item.name,
-				quantity: item.quantity,
-				price: parseFloat(item.price),
-			})),
+			totalAmount,
+			body.mpFormData,
 			body.customer.email,
 		);
 
-		// 3. Devolver URL de pago al frontend
+		// Actualizar estado del pedido en WooCommerce según resultado
+		if (payment.status === "approved") {
+			await updateWCOrderStatus(order.id, "processing", String(payment.id));
+		}
+
+		const resultStatus =
+			payment.status === "approved"
+				? "success"
+				: payment.status === "in_process" || payment.status === "pending"
+				? "pending"
+				: "failure";
+
 		return NextResponse.json({
 			orderId: order.id,
-			initPoint: preference.init_point,
+			paymentStatus: payment.status,
+			resultStatus,
 		});
 	} catch (error) {
 		console.error("[checkout]", error);

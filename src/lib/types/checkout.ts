@@ -9,6 +9,10 @@ export interface CheckoutFormData {
 	city: string;
 	postalCode?: string;
 	notes?: string;
+	// Dirección de envío alternativa (si difiere de la de contacto)
+	shippingAddress?: string;
+	shippingCity?: string;
+	shippingPostalCode?: string;
 }
 
 // ── Request / Response de la API ──
@@ -20,14 +24,20 @@ export interface CheckoutLineItem {
 	name: string;
 }
 
+export type PaymentMethod = "mercadopago" | "bank_transfer";
+
 export interface CheckoutRequest {
 	customer: CheckoutFormData;
 	items: CheckoutLineItem[];
+	paymentMethod: PaymentMethod;
+	/** Datos del token generado por MercadoPago Bricks (solo para pago con tarjeta) */
+	mpFormData?: Record<string, unknown>;
 }
 
 export interface CheckoutResponse {
 	orderId: number;
-	initPoint: string;
+	initPoint?: string;
+	method?: PaymentMethod;
 }
 
 // ── MercadoPago ──

@@ -1,5 +1,6 @@
 "use client";
 
+import { Building2, CheckCircle, Clock, XCircle } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";
@@ -13,7 +14,7 @@ function ResultadoContent() {
 
 	// Limpiar carrito en success/pending (por si el redirect no lo hizo)
 	useEffect(() => {
-		if (status === "success" || status === "pending") {
+		if (status === "success" || status === "pending" || status === "bank_transfer") {
 			clearCart();
 		}
 	}, [status, clearCart]);
@@ -21,7 +22,9 @@ function ResultadoContent() {
 	if (status === "success") {
 		return (
 			<section className="rounded-2xl border border-[var(--color-line)] bg-[var(--color-panel)] p-8 text-center">
-				<div className="mb-4 text-5xl">✓</div>
+				<div className="mb-4 flex justify-center">
+				<CheckCircle size={48} className="text-green-500" />
+			</div>
 				<h1 className="mt-0 mb-2 text-2xl">¡Gracias por tu compra!</h1>
 				<p className="text-[var(--color-muted)]">
 					Tu pedido fue procesado correctamente. Te enviaremos un
@@ -40,7 +43,9 @@ function ResultadoContent() {
 	if (status === "pending") {
 		return (
 			<section className="rounded-2xl border border-[var(--color-line)] bg-[var(--color-panel)] p-8 text-center">
-				<div className="mb-4 text-5xl">⏳</div>
+				<div className="mb-4 flex justify-center">
+				<Clock size={48} className="text-yellow-500" />
+			</div>
 				<h1 className="mt-0 mb-2 text-2xl">Pago en proceso</h1>
 				<p className="text-[var(--color-muted)]">
 					Tu pago está siendo procesado. Te notificaremos por email
@@ -57,10 +62,71 @@ function ResultadoContent() {
 		);
 	}
 
+	if (status === "bank_transfer") {
+		return (
+			<section className="rounded-2xl border border-[var(--color-line)] bg-[var(--color-panel)] p-8">
+				<div className="mb-4 flex justify-center">
+					<Building2 size={48} className="text-[var(--color-brand)]" />
+				</div>
+				<h1 className="mt-0 mb-2 text-center text-2xl">Pedido confirmado</h1>
+				<p className="mb-6 text-center text-[var(--color-muted)]">
+					Transferí el importe a la siguiente cuenta y tu pedido será confirmado en menos de 24 horas hábiles.
+				</p>
+				<div className="rounded-xl border border-[var(--color-line)] bg-[var(--color-bg)] p-5 text-sm">
+					<dl className="grid gap-3">
+						<div className="flex justify-between gap-4">
+							<dt className="font-semibold text-[var(--color-ink)]">Banco</dt>
+							<dd className="text-[var(--color-muted)]">BROU</dd>
+						</div>
+						<div className="flex justify-between gap-4">
+							<dt className="font-semibold text-[var(--color-ink)]">Tipo de cuenta</dt>
+							<dd className="text-[var(--color-muted)]">Caja de ahorro en pesos</dd>
+						</div>
+						<div className="flex justify-between gap-4">
+							<dt className="font-semibold text-[var(--color-ink)]">Número de cuenta</dt>
+							<dd className="font-mono text-[var(--color-muted)]">001697550-00001</dd>
+						</div>
+						<div className="flex justify-between gap-4">
+							<dt className="font-semibold text-[var(--color-ink)]">Titular</dt>
+							<dd className="text-[var(--color-muted)]">Lucas Costabel</dd>
+						</div>
+					</dl>
+				</div>
+				<p className="mt-4 text-center text-xs text-[var(--color-muted)]">
+					Una vez realizada la transferencia, envianos el comprobante por{" "}
+					<a
+						href="https://wa.me/59898842100"
+						target="_blank"
+						rel="noopener noreferrer"
+						className="text-[var(--color-brand)] hover:underline"
+					>
+						WhatsApp
+					</a>{" "}
+					o por{" "}
+					<a
+						href="/contacto"
+						className="text-[var(--color-brand)] hover:underline"
+					>
+						nuestro formulario de contacto
+					</a>
+					.
+				</p>
+				<Link
+					href="/productos"
+					className="mt-6 inline-flex w-full items-center justify-center rounded-full bg-[var(--color-brand)] px-6 py-2.5 font-bold text-[#f6fffb] transition-colors hover:bg-[var(--color-brand-strong)]"
+				>
+					Volver a la tienda
+				</Link>
+			</section>
+		);
+	}
+
 	// failure o status desconocido
 	return (
 		<section className="rounded-2xl border border-[var(--color-line)] bg-[var(--color-panel)] p-8 text-center">
-			<div className="mb-4 text-5xl">✕</div>
+			<div className="mb-4 flex justify-center">
+				<XCircle size={48} className="text-red-500" />
+			</div>
 			<h1 className="mt-0 mb-2 text-2xl">Pago no procesado</h1>
 			<p className="text-[var(--color-muted)]">
 				No pudimos procesar tu pago. No se realizó ningún cobro.

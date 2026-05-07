@@ -1,4 +1,6 @@
+import Image from "next/image";
 import Link from "next/link";
+import { MapPin, Phone } from "lucide-react";
 
 const LINKS = [
 	{ href: "/productos", label: "Catálogo" },
@@ -16,9 +18,15 @@ export default function Footer() {
 				<div className="grid gap-8 sm:grid-cols-3">
 					{/* Brand */}
 					<div>
-						<h3 className="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-ink)]">
-							Abraxas Joyería
-						</h3>
+						<Link href="/" className="mb-4 inline-block">
+							<Image
+								src="https://api.joyasabraxas.com/wp-content/uploads/2024/06/logo-blanco.png"
+								alt="Abraxas Joyería"
+								width={120}
+								height={40}
+								className="h-10 w-auto object-contain"
+							/>
+						</Link>
 						<p className="text-sm leading-relaxed text-[var(--color-muted)]">
 							Joyería artesanal de alta calidad. Cada pieza cuenta una historia.
 						</p>
@@ -49,9 +57,12 @@ export default function Footer() {
 							Contacto
 						</h3>
 						<ul className="flex list-none flex-col gap-2 text-sm text-[var(--color-muted)]">
-							<li>📍 Montevideo, Uruguay</li>
-							<li>
-								📱{" "}
+							<li className="flex items-center gap-2">
+								<MapPin size={14} className="shrink-0" />
+								Montevideo, Uruguay
+							</li>
+							<li className="flex items-center gap-2">
+								<Phone size={14} className="shrink-0" />
 								<a
 									href="https://wa.me/59898842100"
 									target="_blank"
