@@ -89,7 +89,7 @@ export default async function ProductoDetailPage({ params }: Props) {
   const hasDiscount = product.sale_price && product.regular_price && product.sale_price !== product.regular_price;
 
   return (
-    <main className="mx-auto max-w-[1080px] px-4 py-8">
+    <main className="mx-auto max-w-[1080px] px-4 pt-8 pb-28 lg:pb-8">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd(product)) }}

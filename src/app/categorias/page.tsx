@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { fetchCategories } from "@/lib/wp";
 import type { WPCategory } from "@/lib/types";
 import Link from "next/link";
@@ -19,8 +19,18 @@ export default async function CategoriasPage() {
 
   try {
     categories = await fetchCategories();
-    // Filter out "Uncategorized"
-    categories = categories.filter((c) => c.slug !== "uncategorized");
+    // Normaliza acentos/mayúsculas para comparar nombres y slugs.
+    const norm = (s: string) =>
+      s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    categories = categories.filter(
+      (c) =>
+        // Solo categorías padre (oculta las hijas)
+        c.parent === 0 &&
+        c.slug !== "uncategorized" &&
+        // Oculta la categoría "Accesorios" (cualquier variante de escritura)
+        !norm(c.name).startsWith("acces") &&
+        !norm(c.slug).startsWith("acces"),
+    );
   } catch (e) {
     error = e instanceof Error ? e.message : "No se pudieron cargar las categorías";
   }

@@ -23,5 +23,8 @@ export function customizationSummary(
 	for (const p of c.personalization ?? []) {
 		out.push({ label: p.label, value: p.value });
 	}
+	if (c.note) {
+		out.push({ label: "Notas", value: c.note });
+	}
 	return out;
 }

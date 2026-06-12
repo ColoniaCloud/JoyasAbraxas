@@ -70,6 +70,8 @@ export interface ProductCustomization {
 	variationAttributes?: { name: string; option: string }[];
 	/** Campos personalizados (ACF / grabado / nota) → meta_data del pedido */
 	personalization?: { label: string; value: string }[];
+	/** Nota libre del cliente para este producto → se adjunta como nota del pedido (customer_note) */
+	note?: string;
 }
 
 export interface WPProduct {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useCart } from "@/lib/cart-context";
 import type {
   ProductCustomization,
@@ -57,7 +57,22 @@ export default function ProductPurchasePanel({
 
   const [variation, setVariation] = useState<VariationState | null>(null);
   const [persInputs, setPersInputs] = useState<Record<string, string>>({});
+  const [note, setNote] = useState("");
   const [added, setAdded] = useState(false);
+
+  // Barra sticky móvil: visible solo cuando el botón inline sale de pantalla
+  const inlineBtnRef = useRef<HTMLButtonElement>(null);
+  const [showSticky, setShowSticky] = useState(false);
+  useEffect(() => {
+    const el = inlineBtnRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => setShowSticky(!entry.isIntersecting),
+      { threshold: 0 },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
 
   const handleVariationChange = useCallback((state: VariationState) => {
     setVariation(state);
@@ -79,6 +94,22 @@ export default function ProductPurchasePanel({
 
   const resolvedPrice = matched?.price || product.price;
 
+  const buttonLabel = added
+    ? "¡Agregado al carrito!"
+    : noVariations
+    ? "No disponible"
+    : !variationOk
+    ? "Completá tu selección"
+    : !persOk
+    ? "Completá los datos"
+    : "Agregar al carrito";
+
+  const buttonStateClass = added
+    ? "cursor-default bg-green-600"
+    : !canAdd
+    ? "cursor-not-allowed bg-[var(--color-muted)] opacity-60"
+    : "cursor-pointer bg-[var(--color-brand)] hover:bg-[var(--color-brand-strong)]";
+
   const handleAddToCart = () => {
     if (!canAdd) return;
 
@@ -93,6 +124,9 @@ export default function ProductPurchasePanel({
       .filter((p) => p.value);
     if (personalization.length) customization.personalization = personalization;
 
+    const trimmedNote = note.trim();
+    if (trimmedNote) customization.note = trimmedNote;
+
     addItem(
       product,
       1,
@@ -103,6 +137,7 @@ export default function ProductPurchasePanel({
   };
 
   return (
+    <>
     <div className="space-y-4">
       {isVariable && !noVariations && (
         <ProductVariationSelector
@@ -126,7 +161,7 @@ export default function ProductPurchasePanel({
                 onChange={(e) =>
                   setPersInputs((p) => ({ ...p, [f.etiqueta]: e.target.value }))
                 }
-                className="rounded-[9px] border border-[var(--color-line)] bg-[var(--color-bg)] p-2.5 font-[inherit] font-normal"
+                className="rounded-[9px] border border-[var(--color-line)] bg-[var(--color-bg)] p-2.5 font-[inherit] font-normal text-base sm:text-sm"
               />
             </label>
           ))}
@@ -149,29 +184,55 @@ export default function ProductPurchasePanel({
         </p>
       )}
 
+      <label className="grid gap-1.5 text-sm font-semibold">
+        Notas
+        <input
+          type="text"
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          placeholder="Agregá una nota para tu pedido (opcional)"
+          className="rounded-[9px] border border-[var(--color-line)] bg-[var(--color-bg)] p-2.5 font-[inherit] font-normal text-base sm:text-sm"
+        />
+      </label>
+
       <button
+        ref={inlineBtnRef}
         type="button"
         onClick={handleAddToCart}
         disabled={!canAdd}
-        className={`w-full rounded-[9px] border-0 p-3 font-[inherit] font-bold text-[#f6fffb] transition-colors ${
-          added
-            ? "cursor-default bg-green-600"
-            : !canAdd
-            ? "cursor-not-allowed bg-[var(--color-muted)] opacity-60"
-            : "cursor-pointer bg-[var(--color-brand)] hover:bg-[var(--color-brand-strong)]"
-        }`}
+        className={`w-full rounded-[9px] border-0 p-3 font-[inherit] font-bold text-[#f6fffb] transition-colors ${buttonStateClass}`}
       >
-        {added
-          ? "¡Agregado al carrito!"
-          : noVariations
-          ? "No disponible"
-          : !variationOk
-          ? "Completá tu selección"
-          : !persOk
-          ? "Completá los datos"
-          : "Agregar al carrito"}
+        {buttonLabel}
       </button>
     </div>
+
+    {/* Barra de compra fija en móvil — aparece al perder de vista el botón inline */}
+    <div
+      className={`fixed inset-x-0 bottom-0 z-40 border-t border-[var(--color-line)] bg-[var(--color-panel)]/95 backdrop-blur-xl transition-transform duration-300 lg:hidden ${
+        showSticky ? "translate-y-0" : "translate-y-full"
+      }`}
+      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+    >
+      <div className="mx-auto flex max-w-[1080px] items-center gap-3 px-4 py-3">
+        <div className="shrink-0 leading-tight">
+          <p className="m-0 text-[11px] text-[var(--color-muted)]">
+            {isVariable && !matched ? "Desde" : "Precio"}
+          </p>
+          <p className="m-0 text-lg font-bold">
+            {resolvedPrice ? `$${resolvedPrice}` : "—"}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={handleAddToCart}
+          disabled={!canAdd}
+          className={`flex-1 rounded-[9px] border-0 p-3 font-[inherit] font-bold text-[#f6fffb] transition-colors ${buttonStateClass}`}
+        >
+          {buttonLabel}
+        </button>
+      </div>
+    </div>
+    </>
   );
 }
 

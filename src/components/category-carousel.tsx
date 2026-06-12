@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import type { WPProduct } from "@/lib/types";
@@ -12,6 +12,17 @@ interface CategoryCarouselProps {
 
 export default function CategoryCarousel({ products, index = 0 }: CategoryCarouselProps) {
   const [paused, setPaused] = useState(false);
+  // En dispositivos táctiles (sin hover) desactivamos el auto-scroll y dejamos
+  // scroll manual con snap; el usuario controla el carrusel deslizando.
+  const [touch, setTouch] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(hover: none), (pointer: coarse)");
+    const update = () => setTouch(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
 
   if (!products.length) {
     return <p className="text-sm text-[var(--color-muted)]">Sin productos disponibles.</p>;
@@ -21,28 +32,37 @@ export default function CategoryCarousel({ products, index = 0 }: CategoryCarous
   const animationName = index % 2 === 0 ? "auto-scroll-left" : "auto-scroll-right";
   const duration = `${Math.max(products.length * 6, 40)}s`;
 
-  // Duplicate list for seamless infinite loop
-  const looped = [...products, ...products];
+  // Desktop: lista duplicada para el loop infinito del marquee.
+  // Táctil: lista simple, sin duplicar, con scroll manual.
+  const looped = touch ? products : [...products, ...products];
 
   return (
     <div
-      className="overflow-hidden"
+      className={
+        touch
+          ? "-mx-6 flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-px-6 px-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          : "overflow-hidden"
+      }
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
       <div
         className="flex gap-4"
-        style={{
-          width: "max-content",
-          animation: `${animationName} ${duration} linear infinite`,
-          animationPlayState: paused ? "paused" : "running",
-        }}
+        style={
+          touch
+            ? { width: "max-content" }
+            : {
+                width: "max-content",
+                animation: `${animationName} ${duration} linear infinite`,
+                animationPlayState: paused ? "paused" : "running",
+              }
+        }
       >
         {looped.map((product, i) => (
           <Link
             key={`${product.id}-${i}`}
             href={`/productos/${product.slug}`}
-            className="group flex w-[220px] shrink-0 flex-col overflow-hidden rounded-2xl border border-[var(--color-line)] bg-[var(--color-panel)] transition-shadow hover:shadow-[0_4px_24px_rgba(0,0,0,0.4)]"
+            className="group flex w-[200px] shrink-0 snap-start flex-col overflow-hidden rounded-2xl border border-[var(--color-line)] bg-[var(--color-panel)] transition-shadow hover:shadow-[0_4px_24px_rgba(0,0,0,0.4)] sm:w-[220px]"
           >
             <div className="relative h-[200px] w-full overflow-hidden bg-[#1c1a18]">
               {product.images[0] ? (

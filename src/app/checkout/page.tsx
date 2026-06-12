@@ -20,7 +20,8 @@ interface StoredUser {
   name: string;
 }
 
-const INPUT = "rounded-[9px] border border-[var(--color-line)] p-2.5 font-[inherit] w-full bg-[var(--color-bg)]";
+// text-base (16px) en móvil evita el auto-zoom de iOS al enfocar; vuelve a 14px en ≥sm
+const INPUT = "rounded-[9px] border border-[var(--color-line)] p-2.5 font-[inherit] w-full bg-[var(--color-bg)] text-base sm:text-sm";
 
 export default function CheckoutPage() {
   const { items, totalItems, totalPrice, clearCart } = useCart();
@@ -82,6 +83,13 @@ export default function CheckoutPage() {
     e.preventDefault();
     setError("");
     const form = new FormData(e.currentTarget);
+    // Combina las notas escritas en el checkout con las notas por producto
+    // (input "Notas" de la página de producto) en una sola nota del pedido.
+    const baseNotes = String(form.get("notes") || "").trim();
+    const productNotes = items
+      .filter((i) => i.customization?.note?.trim())
+      .map((i) => `${i.product.name}: ${i.customization!.note!.trim()}`);
+    const notes = [baseNotes, ...productNotes].filter(Boolean).join("\n");
     const payload: CheckoutRequest = {
       customer: {
         firstName: String(form.get("firstName") || ""),
@@ -91,7 +99,7 @@ export default function CheckoutPage() {
         address: String(form.get("address") || ""),
         city: String(form.get("city") || ""),
         postalCode: String(form.get("postalCode") || ""),
-        notes: String(form.get("notes") || ""),
+        notes,
         ...(shipToDifferent && {
           shippingAddress: String(form.get("shippingAddress") || ""),
           shippingCity: String(form.get("shippingCity") || ""),

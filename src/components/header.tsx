@@ -1,12 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useState, useRef } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useState, useRef, useEffect, type FormEvent } from "react";
 import Image from "next/image";
 import { useCart } from "@/lib/cart-context";
 import { cn } from "@/lib/utils";
-import { ShoppingBag, User, Menu, X, ChevronDown } from "lucide-react";
+import { ShoppingBag, User, Menu, X, ChevronDown, Search } from "lucide-react";
 import type { WPCategory } from "@/lib/types";
 
 const NAV_LINKS = [
@@ -23,10 +23,14 @@ interface HeaderProps {
 
 export default function Header({ categories = [] }: HeaderProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const { totalItems } = useCart();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileCatsOpen, setMobileCatsOpen] = useState(false);
   const [megaOpen, setMegaOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const megaTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   function openMega() {
@@ -35,6 +39,19 @@ export default function Header({ categories = [] }: HeaderProps) {
   }
   function closeMega() {
     megaTimeout.current = setTimeout(() => setMegaOpen(false), 120);
+  }
+
+  useEffect(() => {
+    if (searchOpen) searchInputRef.current?.focus();
+  }, [searchOpen]);
+
+  function handleSearch(e: FormEvent) {
+    e.preventDefault();
+    const q = query.trim();
+    if (!q) return;
+    setSearchOpen(false);
+    setMobileOpen(false);
+    router.push(`/buscar?q=${encodeURIComponent(q)}`);
   }
 
   return (
@@ -161,10 +178,20 @@ export default function Header({ categories = [] }: HeaderProps) {
             )}
           </ul>
 
+          {/* Search */}
+          <button
+            onClick={() => setSearchOpen((v) => !v)}
+            className="cursor-pointer rounded-lg border-0 bg-transparent p-2.5 text-[var(--color-ink)] transition-colors hover:text-[var(--color-brand)]"
+            aria-label={searchOpen ? "Cerrar búsqueda" : "Buscar"}
+            aria-expanded={searchOpen}
+          >
+            {searchOpen ? <X size={20} /> : <Search size={20} strokeWidth={1.5} />}
+          </button>
+
           {/* Hamburger (mobile only) */}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="cursor-pointer rounded-lg border-0 bg-transparent p-1.5 text-[var(--color-ink)] transition-colors hover:text-[var(--color-brand)] lg:hidden"
+            className="cursor-pointer rounded-lg border-0 bg-transparent p-2.5 text-[var(--color-ink)] transition-colors hover:text-[var(--color-brand)] lg:hidden"
             aria-label={mobileOpen ? "Cerrar menú" : "Abrir menú"}
           >
             {mobileOpen ? <X size={20} /> : <Menu size={20} />}
@@ -173,7 +200,7 @@ export default function Header({ categories = [] }: HeaderProps) {
           {/* User */}
           <Link
             href="/mi-cuenta"
-            className="rounded-lg p-1.5 text-[var(--color-ink)] transition-colors hover:text-[var(--color-brand)]"
+            className="rounded-lg p-2.5 text-[var(--color-ink)] transition-colors hover:text-[var(--color-brand)]"
             aria-label="Mi cuenta"
           >
             <User size={20} strokeWidth={1.5} />
@@ -182,18 +209,44 @@ export default function Header({ categories = [] }: HeaderProps) {
           {/* Cart */}
           <Link
             href="/carrito"
-            className="relative rounded-lg p-1.5 text-[var(--color-ink)] transition-colors hover:text-[var(--color-brand)]"
+            className="relative rounded-lg p-2.5 text-[var(--color-ink)] transition-colors hover:text-[var(--color-brand)]"
             aria-label="Carrito"
           >
             <ShoppingBag size={20} strokeWidth={1.5} />
             {totalItems > 0 && (
-              <span className="absolute top-0.5 right-0.5 flex size-[15px] items-center justify-center rounded-full bg-[var(--color-brand)] text-[9px] font-bold text-[var(--color-panel)]">
+              <span className="absolute top-1 right-1 flex size-[15px] items-center justify-center rounded-full bg-[var(--color-brand)] text-[9px] font-bold text-[var(--color-panel)]">
                 {totalItems > 99 ? "99+" : totalItems}
               </span>
             )}
           </Link>
         </div>
       </nav>
+
+      {/* Search bar */}
+      <div
+        className={cn(
+          "overflow-hidden border-t border-[var(--color-line)] transition-all duration-300",
+          searchOpen ? "max-h-24 opacity-100" : "max-h-0 opacity-0"
+        )}
+      >
+        <form onSubmit={handleSearch} className="flex items-center gap-2 px-5 py-3">
+          <Search size={18} className="shrink-0 text-[var(--color-muted)]" />
+          <input
+            ref={searchInputRef}
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Buscar productos…"
+            className="w-full border-0 bg-transparent text-base text-[var(--color-ink)] outline-none placeholder:text-[var(--color-muted)]"
+          />
+          <button
+            type="submit"
+            className="shrink-0 cursor-pointer rounded-lg bg-[var(--color-brand)] px-4 py-2 text-[12px] font-semibold uppercase tracking-[0.12em] text-white transition-colors hover:bg-[var(--color-brand-strong)]"
+          >
+            Buscar
+          </button>
+        </form>
+      </div>
 
       {/* Mobile dropdown */}
       <div

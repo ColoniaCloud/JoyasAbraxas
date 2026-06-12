@@ -36,10 +36,11 @@ async function wcGet<T>(path: string, revalidate = 1800): Promise<T> {
 	return response.json() as Promise<T>;
 }
 
-export async function fetchProducts({ perPage = 12, category, onSale, page = 1 }: { perPage?: number; category?: number; onSale?: boolean; page?: number } = {}) {
+export async function fetchProducts({ perPage = 12, category, onSale, page = 1, search }: { perPage?: number; category?: number; onSale?: boolean; page?: number; search?: string } = {}) {
 	let path = `/wp-json/wc/v3/products?per_page=${perPage}&page=${page}`;
 	if (category) path += `&category=${category}`;
 	if (onSale) path += `&on_sale=true`;
+	if (search) path += `&search=${encodeURIComponent(search)}`;
 
 	ensureWpUrl();
 	const url = new URL(path, wpBaseUrl);

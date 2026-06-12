@@ -58,7 +58,7 @@ export default async function ProductosPage({ searchParams }: Props) {
         <p>No hay productos para mostrar.</p>
       )}
 
-      <section className="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-4">
+      <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
         {products.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}

@@ -23,14 +23,14 @@ export default function ProductCard({ product }: ProductCardProps) {
 			href={`/productos/${product.slug}`}
 			className="group overflow-hidden rounded-2xl border border-[var(--color-line)] bg-[var(--color-panel)] transition-shadow hover:shadow-[0_4px_24px_rgba(0,0,0,0.4)]"
 		>
-			<div className="relative h-[200px] w-full overflow-hidden bg-[#1c1a18]">
+			<div className="relative aspect-square w-full overflow-hidden bg-[#1c1a18]">
 				{product.images[0] ? (
 					<Image
 						src={product.images[0].src}
 						alt={product.images[0].alt || product.name}
 						fill
 						className="object-cover transition-transform duration-500 group-hover:scale-105"
-						sizes="260px"
+						sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
 					/>
 				) : (
 					<div className="flex h-full items-center justify-center text-4xl text-[var(--color-muted)]">
