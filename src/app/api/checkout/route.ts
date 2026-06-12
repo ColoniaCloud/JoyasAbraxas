@@ -35,7 +35,9 @@ export async function POST(request: Request) {
 			body.customer,
 			body.items.map((item) => ({
 				productId: item.productId,
+				variationId: item.variationId,
 				quantity: item.quantity,
+				personalization: item.personalization,
 			})),
 			paymentMethod,
 		);

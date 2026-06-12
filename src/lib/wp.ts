@@ -1,4 +1,4 @@
-import type { AuthResult, WPCategory, WPPost, WPProduct, WPReview } from './types';
+import type { AuthResult, WCAttributeTerm, WPCategory, WPPost, WPProduct, WPReview, WPVariation } from './types';
 
 const wpBaseUrl = process.env.NEXT_PUBLIC_WP_URL;
 const authEndpoint =
@@ -106,6 +106,14 @@ export async function fetchPost(slug: string) {
 	if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
 	const posts = (await response.json()) as WPPost[];
 	return posts[0] ?? null;
+}
+
+export async function fetchAttributeTerms(attrId: number) {
+	return wcGet<WCAttributeTerm[]>(`/wp-json/wc/v3/products/attributes/${attrId}/terms?per_page=50`, 3600);
+}
+
+export async function fetchProductVariations(productId: number) {
+	return wcGet<WPVariation[]>(`/wp-json/wc/v3/products/${productId}/variations?per_page=100`, 900);
 }
 
 export async function loginUser(username: string, password: string) {

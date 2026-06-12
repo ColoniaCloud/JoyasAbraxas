@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { useCart } from "@/lib/cart-context";
+import { unitPrice, customizationSummary } from "@/lib/cart";
 import type { CheckoutRequest, PaymentMethod } from "@/lib/types/checkout";
 import { Building2, CreditCard, LogIn, ShieldCheck, UserCheck } from "lucide-react";
 import dynamic from "next/dynamic";
@@ -99,9 +100,11 @@ export default function CheckoutPage() {
       },
       items: items.map((item) => ({
         productId: item.product.id,
+        variationId: item.customization?.variationId,
         quantity: item.quantity,
-        price: item.product.price,
+        price: unitPrice(item).toString(),
         name: item.product.name,
+        personalization: item.customization?.personalization,
       })),
       paymentMethod,
     };
@@ -181,11 +184,14 @@ export default function CheckoutPage() {
             <h2 className="mt-0 mb-4 text-lg">Tu pedido</h2>
             <div className="flex flex-col gap-3 border-b border-[var(--color-line)] pb-4">
               {items.map((item) => (
-                <div key={item.product.id} className="flex gap-3">
+                <div key={item.key} className="flex gap-3">
                   <Image src={item.product.images[0]?.src ?? "/favicon.svg"} alt={item.product.name} width={56} height={56} className="size-14 rounded-lg bg-[#1c1a18] object-cover" />
                   <div className="flex-1">
                     <p className="m-0 text-sm font-semibold">{item.product.name}</p>
-                    <p className="m-0 text-sm text-[var(--color-muted)]">x{item.quantity} - ${(parseFloat(item.product.price || "0") * item.quantity).toFixed(2)}</p>
+                    {customizationSummary(item.customization).length > 0 && (
+                      <p className="m-0 text-xs text-[var(--color-muted)]">{customizationSummary(item.customization).map((d) => `${d.label}: ${d.value}`).join(" · ")}</p>
+                    )}
+                    <p className="m-0 text-sm text-[var(--color-muted)]">x{item.quantity} - ${(unitPrice(item) * item.quantity).toFixed(2)}</p>
                   </div>
                 </div>
               ))}
@@ -311,11 +317,14 @@ export default function CheckoutPage() {
           <h2 className="mt-0 mb-4 text-lg">Tu pedido</h2>
           <div className="flex flex-col gap-3 border-b border-[var(--color-line)] pb-4">
             {items.map((item) => (
-              <div key={item.product.id} className="flex gap-3">
+              <div key={item.key} className="flex gap-3">
                 <Image src={item.product.images[0]?.src ?? "/favicon.svg"} alt={item.product.name} width={56} height={56} className="size-14 rounded-lg bg-[#1c1a18] object-cover" />
                 <div className="flex-1">
                   <p className="m-0 text-sm font-semibold">{item.product.name}</p>
-                  <p className="m-0 text-sm text-[var(--color-muted)]">x{item.quantity} - ${(parseFloat(item.product.price || "0") * item.quantity).toFixed(2)}</p>
+                  {customizationSummary(item.customization).length > 0 && (
+                    <p className="m-0 text-xs text-[var(--color-muted)]">{customizationSummary(item.customization).map((d) => `${d.label}: ${d.value}`).join(" · ")}</p>
+                  )}
+                  <p className="m-0 text-sm text-[var(--color-muted)]">x{item.quantity} - ${(unitPrice(item) * item.quantity).toFixed(2)}</p>
                 </div>
               </div>
             ))}

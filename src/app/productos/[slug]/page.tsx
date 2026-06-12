@@ -1,11 +1,12 @@
-import { fetchProductBySlug, fetchProductReviews } from "@/lib/wp";
+import { fetchProductBySlug, fetchProductReviews, fetchAttributeTerms, fetchProductVariations } from "@/lib/wp";
 import { sanitize } from "@/lib/sanitize";
 import { productJsonLd, breadcrumbJsonLd } from "@/lib/structured-data";
 import type { Metadata } from "next";
+import type { WCAttributeTerm, WPVariation } from "@/lib/types";
 import Link from "next/link";
-import AddToCartButton from "@/components/add-to-cart-button";
 import Breadcrumbs from "@/components/breadcrumbs";
 import ProductGallery from "@/components/product-gallery";
+import ProductPurchasePanel from "@/components/product-purchase-panel";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -56,6 +57,33 @@ export default async function ProductoDetailPage({ params }: Props) {
         </p>
       </main>
     );
+  }
+
+  const isVariable = product.type === "variable";
+
+  // Atributos de variación (los que el cliente elige) vs. atributos descriptivos
+  const variationAttrs = product.attributes.filter((a) => a.variation);
+  const infoAttrs = product.attributes.filter(
+    (a) => !a.variation && a.options.some(Boolean),
+  );
+
+  let variations: WPVariation[] = [];
+  let colorTerms: WCAttributeTerm[] = [];
+  let acabadoTerms: WCAttributeTerm[] = [];
+
+  if (isVariable && product.variations.length > 0) {
+    const colorAttr = variationAttrs.find((a) => a.slug === "pa_colores");
+    const acabadoAttr = variationAttrs.find((a) => a.slug === "pa_acabado");
+    try {
+      [variations, colorTerms, acabadoTerms] = await Promise.all([
+        fetchProductVariations(product.id),
+        colorAttr ? fetchAttributeTerms(colorAttr.id) : Promise.resolve([]),
+        acabadoAttr ? fetchAttributeTerms(acabadoAttr.id) : Promise.resolve([]),
+      ]);
+    } catch (e) {
+      console.error("[product-page] fetch variations/terms failed:", e);
+      // El selector seguirá funcionando con fallbacks; sin variaciones queda deshabilitado.
+    }
   }
 
   const hasDiscount = product.sale_price && product.regular_price && product.sale_price !== product.regular_price;
@@ -110,7 +138,9 @@ export default async function ProductoDetailPage({ params }: Props) {
 
           <div className="mb-4 flex items-baseline gap-2">
             <span className="text-2xl font-bold">
-              {product.price ? `$${product.price}` : "Sin precio"}
+              {product.price
+                ? `${isVariable ? "Desde " : ""}$${product.price}`
+                : "Sin precio"}
             </span>
             {hasDiscount && (
               <span className="text-base text-[var(--color-muted)] line-through">
@@ -132,18 +162,23 @@ export default async function ProductoDetailPage({ params }: Props) {
             />
           )}
 
-          <AddToCartButton product={product} />
+          <ProductPurchasePanel
+            product={product}
+            variations={variations}
+            colorTerms={colorTerms}
+            acabadoTerms={acabadoTerms}
+          />
 
           {product.sku && (
             <p className="mt-4 text-sm text-[var(--color-muted)]">SKU: {product.sku}</p>
           )}
 
-          {product.attributes.length > 0 && (
+          {infoAttrs.length > 0 && (
             <div className="mt-4 space-y-2">
-              {product.attributes.map((attr) => (
+              {infoAttrs.map((attr) => (
                 <div key={attr.id} className="text-sm">
                   <span className="font-semibold">{attr.name}:</span>{" "}
-                  {attr.options.join(", ")}
+                  {attr.options.filter(Boolean).join(", ")}
                 </div>
               ))}
             </div>

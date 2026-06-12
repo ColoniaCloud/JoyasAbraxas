@@ -14,7 +14,62 @@ export interface WPProductCategory {
 export interface WPProductAttribute {
 	id: number;
 	name: string;
+	slug?: string;
+	position?: number;
 	options: string[];
+	variation?: boolean;
+	visible?: boolean;
+}
+
+export interface WCAttributeTerm {
+	id: number;
+	name: string;
+	slug: string;
+	count: number;
+	image: WPImage | null;
+}
+
+/** Un par clave/valor de meta de WooCommerce (post meta, ACF crudo, etc.) */
+export interface WPMeta {
+	id?: number;
+	key: string;
+	value: unknown;
+}
+
+/** Atributo concreto de una variación (ya resuelto a una opción) */
+export interface WPVariationAttribute {
+	id: number;
+	name: string;
+	slug: string;
+	/** Opción elegida. Vacío ("") significa "cualquiera" en WooCommerce */
+	option: string;
+}
+
+/** Una variación de un producto `variable` (combinación concreta de atributos) */
+export interface WPVariation {
+	id: number;
+	price: string;
+	regular_price: string;
+	sale_price: string;
+	sku: string;
+	stock_status: string;
+	attributes: WPVariationAttribute[];
+	image: WPImage | null;
+}
+
+/**
+ * Personalización elegida por el cliente para un producto.
+ *  - `variationId` + `variationAttributes`: para productos `variable` (precio/stock reales los maneja WooCommerce vía el variation_id).
+ *  - `personalization`: campos libres / ACF que viajan como `meta_data` del line_item.
+ */
+export interface ProductCustomization {
+	variationId?: number;
+	/** Precio real de la variación elegida (para carrito y total) */
+	variationPrice?: string;
+	/** Atributos de la variación, solo para mostrar en carrito/checkout */
+	variationAttributes?: { name: string; option: string }[];
+	/** Campos personalizados (ACF / grabado / nota) → meta_data del pedido */
+	personalization?: { label: string; value: string }[];
 }
 
 export interface WPProduct {
@@ -22,6 +77,7 @@ export interface WPProduct {
 	name: string;
 	slug: string;
 	permalink: string;
+	type: string;
 	price: string;
 	regular_price: string;
 	sale_price: string;
@@ -34,6 +90,12 @@ export interface WPProduct {
 	sku: string;
 	categories: WPProductCategory[];
 	attributes: WPProductAttribute[];
+	/** IDs de las variaciones (vacío en productos `simple`) */
+	variations: number[];
+	has_options?: boolean;
+	meta_data?: WPMeta[];
+	/** Campos ACF si el backend los expone bajo la clave `acf` */
+	acf?: Record<string, unknown>;
 	related_ids: number[];
 }
 
@@ -78,6 +140,9 @@ export interface AuthResult {
 }
 
 export interface CartItem {
+	/** Clave única de línea: `${product.id}:${variationId ?? 0}` */
+	key: string;
 	product: WPProduct;
 	quantity: number;
+	customization?: ProductCustomization;
 }

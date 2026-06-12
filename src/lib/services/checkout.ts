@@ -5,11 +5,20 @@ const WC_KEY = process.env.WC_CONSUMER_KEY!;
 const WC_SECRET = process.env.WC_CONSUMER_SECRET!;
 const MP_TOKEN = process.env.MP_ACCESS_TOKEN!;
 
+interface OrderItem {
+	productId: number;
+	/** Variación elegida en productos `variable` (WooCommerce resuelve precio/stock por este id) */
+	variationId?: number;
+	quantity: number;
+	/** Campos personalizados (ACF / grabado) → meta_data del line_item */
+	personalization?: { label: string; value: string }[];
+}
+
 // ── WooCommerce Orders ──
 
 export async function createWCOrder(
 	customer: CheckoutFormData,
-	items: { productId: number; quantity: number }[],
+	items: OrderItem[],
 	paymentMethod: "mercadopago" | "bank_transfer" = "mercadopago",
 ) {
 	const url = new URL("/wp-json/wc/v3/orders", WP_URL);
@@ -43,7 +52,16 @@ export async function createWCOrder(
 		},
 		line_items: items.map((item) => ({
 			product_id: item.productId,
+			...(item.variationId ? { variation_id: item.variationId } : {}),
 			quantity: item.quantity,
+			...(item.personalization?.length
+				? {
+						meta_data: item.personalization.map((p) => ({
+							key: p.label,
+							value: p.value,
+						})),
+					}
+				: {}),
 		})),
 		customer_note: customer.notes || "",
 	};

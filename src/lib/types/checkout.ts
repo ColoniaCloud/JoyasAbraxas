@@ -19,9 +19,13 @@ export interface CheckoutFormData {
 
 export interface CheckoutLineItem {
 	productId: number;
+	/** ID de la variación elegida (productos `variable`) */
+	variationId?: number;
 	quantity: number;
 	price: string;
 	name: string;
+	/** Campos personalizados (ACF / grabado) → meta_data del line_item */
+	personalization?: { label: string; value: string }[];
 }
 
 export type PaymentMethod = "mercadopago" | "bank_transfer";

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCart } from "@/lib/cart-context";
+import { unitPrice, customizationSummary } from "@/lib/cart";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -28,9 +29,11 @@ export default function CarritoPage() {
         <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
           {/* Items */}
           <div className="flex flex-col gap-3">
-            {items.map((item) => (
+            {items.map((item) => {
+              const details = customizationSummary(item.customization);
+              return (
               <article
-                key={item.product.id}
+                key={item.key}
                 className="flex gap-4 rounded-[14px] border border-[var(--color-line)] bg-[var(--color-panel)] p-4"
               >
                 <Image
@@ -48,14 +51,23 @@ export default function CarritoPage() {
                     >
                       {item.product.name}
                     </Link>
-                    <p className="m-0 font-bold">
-                      ${item.product.price}
+                    {details.length > 0 && (
+                      <ul className="m-0 mt-1 list-none p-0 text-xs text-[var(--color-muted)]">
+                        {details.map((d) => (
+                          <li key={d.label}>
+                            <span className="font-medium">{d.label}:</span> {d.value}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    <p className="m-0 mt-1 font-bold">
+                      ${unitPrice(item).toFixed(2)}
                     </p>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="flex items-center gap-1 rounded-lg border border-[var(--color-line)]">
                       <button
-                        onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                        onClick={() => updateQuantity(item.key, item.quantity - 1)}
                         disabled={item.quantity <= 1}
                         className="cursor-pointer border-0 bg-transparent px-2.5 py-1 text-lg disabled:opacity-30"
                       >
@@ -65,14 +77,14 @@ export default function CarritoPage() {
                         {item.quantity}
                       </span>
                       <button
-                        onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                        onClick={() => updateQuantity(item.key, item.quantity + 1)}
                         className="cursor-pointer border-0 bg-transparent px-2.5 py-1 text-lg"
                       >
                         +
                       </button>
                     </div>
                     <button
-                      onClick={() => removeItem(item.product.id)}
+                      onClick={() => removeItem(item.key)}
                       className="cursor-pointer border-0 bg-transparent text-sm font-semibold text-red-600 hover:text-red-800"
                     >
                       Eliminar
@@ -80,7 +92,8 @@ export default function CarritoPage() {
                   </div>
                 </div>
               </article>
-            ))}
+              );
+            })}
             <button
               onClick={clearCart}
               className="cursor-pointer self-start rounded-[9px] border border-[var(--color-line)] bg-transparent px-3 py-1.5 text-sm font-medium text-[var(--color-muted)] hover:bg-[var(--color-line)]"
