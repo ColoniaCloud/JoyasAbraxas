@@ -25,3 +25,8 @@ tsconfig.tsbuildinfo
 
 # jetbrains setting folder
 .idea/
+
+# Claude memory / notas personales (no versionar)
+📋-cambios-recientes.md
+🟢-MEMORY.md
+🟢-joyeria-abraxas-variaciones-acf.md
