@@ -2,6 +2,10 @@ import type { WPProduct, WPPost } from "./types";
 
 const SITE_NAME = "Abraxas Joyería";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://joyasabraxas.com";
+// Logo real (WordPress) para el rich result de Organization. El antiguo
+// `${SITE_URL}/branding/logo.png` no existía y dejaba el schema inválido.
+const LOGO_URL =
+	"https://api.joyasabraxas.com/wp-content/uploads/2023/09/cropped-logo_n.png";
 
 export function organizationJsonLd() {
 	return {
@@ -9,7 +13,7 @@ export function organizationJsonLd() {
 		"@type": "JewelryStore",
 		name: SITE_NAME,
 		url: SITE_URL,
-		logo: `${SITE_URL}/branding/logo.png`,
+		logo: LOGO_URL,
 		address: {
 			"@type": "PostalAddress",
 			addressLocality: "Montevideo",

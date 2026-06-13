@@ -5,14 +5,19 @@ import { cn } from "@/lib/utils";
 import { CartProvider } from "@/lib/cart-context";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
+import Analytics from "@/components/analytics";
 import { fetchCategories } from "@/lib/wp";
 import type { WPCategory } from "@/lib/types";
 import { organizationJsonLd } from "@/lib/structured-data";
+
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.joyasabraxas.com";
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 const cormorant = Cormorant_Garamond({subsets:['latin'],weight:['400','500','600','700'],variable:'--font-heading'});
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: "Abraxas | Joyería de Alta Calidad",
   description: "Joyería artesanal de alta calidad. Descubre nuestras colecciones exclusivas.",
   icons: {
@@ -36,6 +41,7 @@ export default async function RootLayout({
   return (
     <html lang="es" className={cn("font-sans", geist.variable, cormorant.variable)}>
       <body>
+        <Analytics />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd()) }}
