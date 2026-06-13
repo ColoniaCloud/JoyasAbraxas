@@ -2,6 +2,7 @@
 
 import { useCart } from "@/lib/cart-context";
 import { unitPrice, customizationSummary } from "@/lib/cart";
+import { formatPrice } from "@/lib/utils";
 import type { CheckoutRequest, PaymentMethod } from "@/lib/types/checkout";
 import { Building2, CreditCard, LogIn, ShieldCheck, UserCheck } from "lucide-react";
 import dynamic from "next/dynamic";
@@ -199,13 +200,13 @@ export default function CheckoutPage() {
                     {customizationSummary(item.customization).length > 0 && (
                       <p className="m-0 text-xs text-[var(--color-muted)]">{customizationSummary(item.customization).map((d) => `${d.label}: ${d.value}`).join(" · ")}</p>
                     )}
-                    <p className="m-0 text-sm text-[var(--color-muted)]">x{item.quantity} - ${(unitPrice(item) * item.quantity).toFixed(2)}</p>
+                    <p className="m-0 text-sm text-[var(--color-muted)]">x{item.quantity} - {formatPrice(unitPrice(item) * item.quantity)}</p>
                   </div>
                 </div>
               ))}
             </div>
-            <div className="flex justify-between pt-3 text-sm text-[var(--color-muted)]"><span>Productos ({totalItems})</span><span>${totalPrice.toFixed(2)}</span></div>
-            <div className="mt-2 flex justify-between text-lg font-bold"><span>Total</span><span>${totalPrice.toFixed(2)}</span></div>
+            <div className="flex justify-between pt-3 text-sm text-[var(--color-muted)]"><span>Productos ({totalItems})</span><span>{formatPrice(totalPrice)}</span></div>
+            <div className="mt-2 flex justify-between text-lg font-bold"><span>Total</span><span>{formatPrice(totalPrice)}</span></div>
             <p className="mt-4 text-center text-xs text-[var(--color-muted)]">Pago seguro procesado por MercadoPago</p>
           </aside>
         </div>
@@ -332,13 +333,13 @@ export default function CheckoutPage() {
                   {customizationSummary(item.customization).length > 0 && (
                     <p className="m-0 text-xs text-[var(--color-muted)]">{customizationSummary(item.customization).map((d) => `${d.label}: ${d.value}`).join(" · ")}</p>
                   )}
-                  <p className="m-0 text-sm text-[var(--color-muted)]">x{item.quantity} - ${(unitPrice(item) * item.quantity).toFixed(2)}</p>
+                  <p className="m-0 text-sm text-[var(--color-muted)]">x{item.quantity} - {formatPrice(unitPrice(item) * item.quantity)}</p>
                 </div>
               </div>
             ))}
           </div>
-          <div className="flex justify-between pt-3 text-sm text-[var(--color-muted)]"><span>Productos ({totalItems})</span><span>${totalPrice.toFixed(2)}</span></div>
-          <div className="mt-2 flex justify-between text-lg font-bold"><span>Total</span><span>${totalPrice.toFixed(2)}</span></div>
+          <div className="flex justify-between pt-3 text-sm text-[var(--color-muted)]"><span>Productos ({totalItems})</span><span>{formatPrice(totalPrice)}</span></div>
+          <div className="mt-2 flex justify-between text-lg font-bold"><span>Total</span><span>{formatPrice(totalPrice)}</span></div>
           <button type="submit" form="checkout-form" disabled={loading || (!loggedUser && accountMode === "idle") || accountMode === "login"} className="mt-4 w-full cursor-pointer rounded-[9px] border-0 bg-[var(--color-brand)] p-3 font-[inherit] font-bold text-[#f6fffb] transition-colors hover:bg-[var(--color-brand-strong)] disabled:cursor-not-allowed disabled:opacity-50">
             {loading ? "Procesando..." : paymentMethod === "mercadopago" ? "Continuar al pago" : "Confirmar pedido"}
           </button>

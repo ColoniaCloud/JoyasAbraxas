@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   title: "Guía de talles de anillos | Abraxas Joyería",
   description:
     "Aprendé a medir tu talle de anillo en casa con una tira de papel o un anillo que ya tengas, y consultá la tabla de equivalencias (circunferencia y diámetro en mm).",
+  alternates: { canonical: "/guia-de-talles" },
   openGraph: {
     title: "Guía de talles de anillos | Abraxas Joyería",
     description:

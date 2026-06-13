@@ -15,9 +15,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   try {
     const post = await fetchPost(slug);
     if (!post) return { title: "Artículo | Abraxas" };
+    const title = post.title.rendered.replace(/<[^>]+>/g, "");
+    const description = post.excerpt.rendered.replace(/<[^>]+>/g, "").slice(0, 160);
+    const image = post._embedded?.["wp:featuredmedia"]?.[0]?.source_url;
     return {
-      title: `${post.title.rendered} | Abraxas`,
-      description: post.excerpt.rendered.replace(/<[^>]+>/g, "").slice(0, 160),
+      title: `${title} | Abraxas`,
+      description,
+      alternates: { canonical: `/blog/${slug}` },
+      openGraph: {
+        type: "article",
+        title,
+        description,
+        url: `/blog/${slug}`,
+        ...(image && { images: [{ url: image }] }),
+      },
     };
   } catch {
     return { title: "Artículo | Abraxas" };

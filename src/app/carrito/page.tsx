@@ -2,6 +2,7 @@
 
 import { useCart } from "@/lib/cart-context";
 import { unitPrice, customizationSummary } from "@/lib/cart";
+import { formatPrice } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -61,7 +62,7 @@ export default function CarritoPage() {
                       </ul>
                     )}
                     <p className="m-0 mt-1 font-bold">
-                      ${unitPrice(item).toFixed(2)}
+                      {formatPrice(unitPrice(item))}
                     </p>
                   </div>
                   <div className="flex items-center gap-3">
@@ -107,11 +108,11 @@ export default function CarritoPage() {
             <h2 className="mt-0 mb-4 text-lg">Resumen</h2>
             <div className="flex justify-between border-b border-[var(--color-line)] pb-3 text-sm">
               <span className="text-[var(--color-muted)]">Productos ({totalItems})</span>
-              <span className="font-semibold">${totalPrice.toFixed(2)}</span>
+              <span className="font-semibold">{formatPrice(totalPrice)}</span>
             </div>
             <div className="flex justify-between pt-3 text-lg font-bold">
               <span>Total</span>
-              <span>${totalPrice.toFixed(2)}</span>
+              <span>{formatPrice(totalPrice)}</span>
             </div>
             <Link
               href="/checkout"

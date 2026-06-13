@@ -8,9 +8,11 @@ import Pagination from "@/components/pagination";
 export const metadata: Metadata = {
   title: "Catálogo | Abraxas Joyería",
   description: "Explora nuestro catálogo completo de joyería artesanal. Anillos, colgantes, caravanas y más.",
+  alternates: { canonical: "/productos" },
   openGraph: {
     title: "Catálogo | Abraxas Joyería",
     description: "Explora nuestro catálogo completo de joyería artesanal.",
+    url: "/productos",
   },
 };
 

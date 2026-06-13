@@ -6,9 +6,11 @@ import ProductCard from "@/components/product-card";
 export const metadata: Metadata = {
   title: "Sale | Abraxas Joyería",
   description: "Ofertas y descuentos en joyería artesanal Abraxas. Piezas seleccionadas a precios especiales.",
+  alternates: { canonical: "/sale" },
   openGraph: {
     title: "Sale | Abraxas Joyería",
     description: "Ofertas y descuentos en joyería artesanal Abraxas.",
+    url: "/sale",
   },
 };
 

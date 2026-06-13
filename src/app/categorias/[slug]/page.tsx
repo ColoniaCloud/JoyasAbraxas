@@ -12,7 +12,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   try {
     const category = await fetchCategoryBySlug(slug);
-    return { title: `${category.name} | Abraxas` };
+    const cleanDesc = category.description?.replace(/<[^>]+>/g, "").trim();
+    const description =
+      cleanDesc?.slice(0, 160) ||
+      `${category.name}: joyería artesanal Abraxas. Descubrí nuestra colección de ${category.name.toLowerCase()}.`;
+    return {
+      title: `${category.name} | Abraxas Joyería`,
+      description,
+      alternates: { canonical: `/categorias/${slug}` },
+      openGraph: {
+        title: `${category.name} | Abraxas Joyería`,
+        description,
+        url: `/categorias/${slug}`,
+        images: category.image?.src ? [{ url: category.image.src }] : [],
+      },
+    };
   } catch {
     return { title: "Categoría | Abraxas" };
   }

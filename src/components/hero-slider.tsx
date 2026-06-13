@@ -97,9 +97,9 @@ export default function HeroSlider({ slides }: HeroSliderProps) {
             <p className="animate-fade-in delay-100 mb-3 text-[11px] font-medium uppercase tracking-[0.25em] text-white/55">
               Joyería Abraxas
             </p>
-            <h1 className="animate-fade-in-up delay-200 mb-4 text-[clamp(2rem,4.5vw,3.8rem)] font-light leading-[1.08] tracking-tight text-white">
+            <h2 className="animate-fade-in-up delay-200 mb-4 text-[clamp(2rem,4.5vw,3.8rem)] font-light leading-[1.08] tracking-tight text-white">
               {slides[current].title}
-            </h1>
+            </h2>
             <p className="animate-fade-in-up delay-300 mb-8 max-w-[460px] text-[15px] leading-relaxed text-white/70">
               {slides[current].tagline}
             </p>

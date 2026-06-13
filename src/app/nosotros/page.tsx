@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Nosotros | Abraxas",
   description: "Conoce la historia y filosofía detrás de Abraxas joyería.",
+  alternates: { canonical: "/nosotros" },
 };
 
 export default function NosotrosPage() {

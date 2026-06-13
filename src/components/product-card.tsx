@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { WPProduct } from "@/lib/types";
+import { formatPrice } from "@/lib/utils";
 
 interface ProductCardProps {
 	product: WPProduct;
@@ -51,15 +52,15 @@ export default function ProductCard({ product }: ProductCardProps) {
 					{hasDiscount ? (
 						<>
 							<span className="text-base font-bold text-[var(--color-brand-strong)]">
-								${product.sale_price}
+								{formatPrice(product.sale_price)}
 							</span>
 							<span className="text-sm text-[var(--color-muted)] line-through">
-								${product.regular_price}
+								{formatPrice(product.regular_price)}
 							</span>
 						</>
 					) : (
 						<span className="text-base font-bold">
-							{product.price ? `$${product.price}` : "Sin precio"}
+							{product.price ? formatPrice(product.price) : "Sin precio"}
 						</span>
 					)}
 				</div>

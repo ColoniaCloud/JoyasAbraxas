@@ -6,6 +6,9 @@ import Image from "next/image";
 
 export const metadata: Metadata = {
   title: "Blog | Abraxas",
+  description:
+    "Historias, cuidados y tendencias de joyería artesanal. El blog de Abraxas Joyería.",
+  alternates: { canonical: "/blog" },
 };
 
 export default async function BlogPage() {

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useCart } from "@/lib/cart-context";
+import { formatPrice } from "@/lib/utils";
 import type {
   ProductCustomization,
   WPProduct,
@@ -219,7 +220,7 @@ export default function ProductPurchasePanel({
             {isVariable && !matched ? "Desde" : "Precio"}
           </p>
           <p className="m-0 text-lg font-bold">
-            {resolvedPrice ? `$${resolvedPrice}` : "—"}
+            {resolvedPrice ? formatPrice(resolvedPrice) : "—"}
           </p>
         </div>
         <button
@@ -249,7 +250,7 @@ function SelectionSummary({
         <p className="m-0 text-xs font-semibold uppercase tracking-wide text-[var(--color-muted)]">
           Tu selección
         </p>
-        {price && <span className="text-sm font-bold">${price}</span>}
+        {price && <span className="text-sm font-bold">{formatPrice(price)}</span>}
       </div>
       <div className="flex flex-wrap gap-2">
         {attributes.map(({ name, option }) => (

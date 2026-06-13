@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import type { WPProduct } from "@/lib/types";
+import { formatPrice } from "@/lib/utils";
 
 interface CategoryCarouselProps {
   products: WPProduct[];
@@ -90,11 +91,11 @@ export default function CategoryCarousel({ products, index = 0 }: CategoryCarous
               </p>
               <div className="mt-auto flex items-baseline gap-1.5">
                 <span className="text-sm font-bold text-[var(--color-brand-strong)]">
-                  {product.price ? `$${product.price}` : "—"}
+                  {product.price ? formatPrice(product.price) : "—"}
                 </span>
                 {product.sale_price && product.sale_price !== product.regular_price && (
                   <span className="text-xs text-[var(--color-muted)] line-through">
-                    ${product.regular_price}
+                    {formatPrice(product.regular_price)}
                   </span>
                 )}
               </div>

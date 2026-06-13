@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { fetchProducts, fetchCategories, fetchPosts } from "@/lib/wp";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://joyasabraxas.com";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.joyasabraxas.com";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 	const staticPages: MetadataRoute.Sitemap = [

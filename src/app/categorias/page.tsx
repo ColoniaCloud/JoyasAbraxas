@@ -7,9 +7,11 @@ import Image from "next/image";
 export const metadata: Metadata = {
   title: "Categorías | Abraxas Joyería",
   description: "Explora nuestras colecciones de joyería artesanal. Anillos, colgantes, caravanas y más.",
+  alternates: { canonical: "/categorias" },
   openGraph: {
     title: "Categorías | Abraxas Joyería",
     description: "Explora nuestras colecciones de joyería artesanal.",
+    url: "/categorias",
   },
 };
 

@@ -1,12 +1,14 @@
-import { fetchProductBySlug, fetchProductReviews, fetchAttributeTerms, fetchProductVariations } from "@/lib/wp";
+import { fetchProductBySlug, fetchProductReviews, fetchAttributeTerms, fetchProductVariations, fetchProducts } from "@/lib/wp";
 import { sanitize } from "@/lib/sanitize";
+import { formatPrice } from "@/lib/utils";
 import { productJsonLd, breadcrumbJsonLd } from "@/lib/structured-data";
 import type { Metadata } from "next";
-import type { WCAttributeTerm, WPVariation } from "@/lib/types";
+import type { WCAttributeTerm, WPVariation, WPProduct } from "@/lib/types";
 import Link from "next/link";
 import Breadcrumbs from "@/components/breadcrumbs";
 import ProductGallery from "@/components/product-gallery";
 import ProductPurchasePanel from "@/components/product-purchase-panel";
+import ProductCard from "@/components/product-card";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -22,9 +24,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return {
       title: `${product.name} | Abraxas Joyería`,
       description,
+      alternates: { canonical: `/productos/${slug}` },
       openGraph: {
+        type: "website",
         title: product.name,
         description,
+        url: `/productos/${slug}`,
         images: product.images[0]?.src ? [{ url: product.images[0].src }] : [],
       },
     };
@@ -88,6 +93,17 @@ export default async function ProductoDetailPage({ params }: Props) {
 
   const hasDiscount = product.sale_price && product.regular_price && product.sale_price !== product.regular_price;
 
+  // Productos relacionados (cross-sell): misma categoría, excluyendo el actual
+  let related: WPProduct[] = [];
+  if (product.categories.length > 0) {
+    try {
+      const res = await fetchProducts({ perPage: 8, category: product.categories[0].id });
+      related = res.data.filter((p) => p.id !== product!.id).slice(0, 4);
+    } catch {
+      // sin relacionados si falla la API
+    }
+  }
+
   return (
     <main className="mx-auto max-w-[1080px] px-4 pt-8 pb-28 lg:pb-8">
       <script
@@ -139,12 +155,12 @@ export default async function ProductoDetailPage({ params }: Props) {
           <div className="mb-4 flex items-baseline gap-2">
             <span className="text-2xl font-bold">
               {product.price
-                ? `${isVariable ? "Desde " : ""}$${product.price}`
+                ? `${isVariable ? "Desde " : ""}${formatPrice(product.price)}`
                 : "Sin precio"}
             </span>
             {hasDiscount && (
               <span className="text-base text-[var(--color-muted)] line-through">
-                ${product.regular_price}
+                {formatPrice(product.regular_price)}
               </span>
             )}
           </div>
@@ -220,6 +236,18 @@ export default async function ProductoDetailPage({ params }: Props) {
                   dangerouslySetInnerHTML={{ __html: review.review }}
                 />
               </article>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Productos relacionados */}
+      {related.length > 0 && (
+        <section className="mt-12">
+          <h2 className="mb-4">También te puede gustar</h2>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
+            {related.map((p) => (
+              <ProductCard key={p.id} product={p} />
             ))}
           </div>
         </section>

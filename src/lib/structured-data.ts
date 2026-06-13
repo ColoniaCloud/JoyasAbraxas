@@ -1,7 +1,7 @@
 import type { WPProduct, WPPost } from "./types";
 
 const SITE_NAME = "Abraxas Joyería";
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://joyasabraxas.com";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.joyasabraxas.com";
 // Logo real (WordPress) para el rich result de Organization. El antiguo
 // `${SITE_URL}/branding/logo.png` no existía y dejaba el schema inválido.
 const LOGO_URL =
@@ -24,6 +24,10 @@ export function organizationJsonLd() {
 			telephone: "+598-98-842-100",
 			contactType: "customer service",
 		},
+		sameAs: [
+			"https://www.instagram.com/joyas.abraxas",
+			"https://www.facebook.com/people/Abraxas-Joyas/100063966942309/",
+		],
 	};
 }
 

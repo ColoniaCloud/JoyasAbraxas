@@ -1,7 +1,21 @@
+import type { Metadata } from "next";
 import { fetchProducts, fetchCategories } from "@/lib/wp";
 import type { WPProduct, WPCategory } from "@/lib/types";
 import HeroSlider, { type HeroSlide } from "@/components/hero-slider";
 import CategorySection from "@/components/category-section";
+
+export const metadata: Metadata = {
+  title: "Abraxas Joyería | Joyería artesanal de alta calidad en Uruguay",
+  description:
+    "Joyería artesanal de alta calidad en Uruguay: anillos, colgantes y caravanas únicos. Descubrí nuestras colecciones exclusivas.",
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: "Abraxas Joyería | Joyería artesanal de alta calidad",
+    description:
+      "Anillos, colgantes y caravanas artesanales. Descubrí nuestras colecciones exclusivas.",
+    url: "/",
+  },
+};
 
 // Map de slugs de categoría → imagen local + copy persuasivo
 const SLIDE_DATA: Record<string, { image: string; tagline: string; buttonLabel: string }> = {
@@ -66,6 +80,9 @@ export default async function HomePage() {
 
   return (
     <main className="-mt-24">
+      <h1 className="sr-only">
+        Abraxas Joyería — joyería artesanal de alta calidad en Uruguay
+      </h1>
       <HeroSlider slides={slides} />
 
       {categories.map((cat, i) => {
