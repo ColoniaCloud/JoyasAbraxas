@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useCart } from "@/lib/cart-context";
 import { formatPrice } from "@/lib/utils";
+import { trackAddToCart } from "@/lib/analytics";
 import type {
   ProductCustomization,
   WPProduct,
@@ -133,6 +134,12 @@ export default function ProductPurchasePanel({
       1,
       Object.keys(customization).length ? customization : undefined,
     );
+    trackAddToCart({
+      id: product.id,
+      name: product.name,
+      price: resolvedPrice ? parseFloat(resolvedPrice) : undefined,
+      quantity: 1,
+    });
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
   };

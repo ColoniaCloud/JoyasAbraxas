@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { useCart } from "@/lib/cart-context";
+import { trackPurchase } from "@/lib/analytics";
 import { Suspense } from "react";
 
 function ResultadoContent() {
@@ -13,9 +14,20 @@ function ResultadoContent() {
 	const { clearCart } = useCart();
 
 	// Limpiar carrito en success/pending (por si el redirect no lo hizo)
+	// y disparar el evento `purchase` (una sola vez) con los datos del pedido.
 	useEffect(() => {
 		if (status === "success" || status === "pending" || status === "bank_transfer") {
 			clearCart();
+			try {
+				const raw = sessionStorage.getItem("abraxas_purchase");
+				if (raw) {
+					const p = JSON.parse(raw);
+					trackPurchase({ orderId: p.orderId, value: p.value, items: p.items });
+					sessionStorage.removeItem("abraxas_purchase");
+				}
+			} catch {
+				/* ignorar */
+			}
 		}
 	}, [status, clearCart]);
 

@@ -3,13 +3,14 @@
 import { useCart } from "@/lib/cart-context";
 import { unitPrice, customizationSummary } from "@/lib/cart";
 import { formatPrice } from "@/lib/utils";
+import { trackBeginCheckout } from "@/lib/analytics";
 import type { CheckoutRequest, PaymentMethod } from "@/lib/types/checkout";
 import { Building2, CreditCard, LogIn, ShieldCheck, UserCheck } from "lucide-react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 
 const MercadoPagoBrick = dynamic(() => import("@/components/mercadopago-brick"), { ssr: false });
 
@@ -48,6 +49,22 @@ export default function CheckoutPage() {
       try { setLoggedUser(JSON.parse(stored) as StoredUser); } catch { /* ignorar */ }
     }
   }, []);
+
+  // begin_checkout: una sola vez, cuando el carrito ya está cargado
+  const beginCheckoutFired = useRef(false);
+  useEffect(() => {
+    if (beginCheckoutFired.current || items.length === 0) return;
+    beginCheckoutFired.current = true;
+    trackBeginCheckout(
+      items.map((i) => ({
+        id: i.product.id,
+        name: i.product.name,
+        price: unitPrice(i),
+        quantity: i.quantity,
+      })),
+      totalPrice,
+    );
+  }, [items, totalPrice]);
 
   function handleLogout() {
     localStorage.removeItem("abraxas_token");
@@ -137,6 +154,25 @@ export default function CheckoutPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Error procesando el pedido");
       sessionStorage.setItem("abraxas_order_id", String(data.orderId));
+      // Guardamos datos del pedido para disparar `purchase` en /checkout/resultado
+      // (el carrito se vacía a continuación).
+      try {
+        sessionStorage.setItem(
+          "abraxas_purchase",
+          JSON.stringify({
+            orderId: data.orderId,
+            value: totalPrice,
+            items: items.map((i) => ({
+              id: i.product.id,
+              name: i.product.name,
+              price: unitPrice(i),
+              quantity: i.quantity,
+            })),
+          }),
+        );
+      } catch {
+        /* ignorar */
+      }
       clearCart();
       if (data.method === "bank_transfer") {
         router.push("/checkout/resultado?status=bank_transfer");
