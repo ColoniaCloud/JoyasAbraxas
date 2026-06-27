@@ -58,6 +58,15 @@ export default function ProductVariationSelector({
     });
   }, []);
 
+  const select = useCallback((slug: string, option: string) => {
+    setSelection((prev) => {
+      const next = { ...prev };
+      if (option) next[slug] = option;
+      else delete next[slug];
+      return next;
+    });
+  }, []);
+
   useEffect(() => {
     const isComplete = variationAttrs.every((a) => selection[a.slug!]);
     const variation = isComplete ? matchVariation(variations, selection) : null;
@@ -67,21 +76,89 @@ export default function ProductVariationSelector({
     onChange({ attributes, variation, isComplete });
   }, [selection, variationAttrs, variations, onChange]);
 
+  // Agrupa pa_talle-ella y pa_talle-el como un par inline (ella primero).
+  // Si solo uno de los dos está presente, se trata como atributo individual.
+  const renderGroups = useMemo(() => {
+    type Attr = (typeof variationAttrs)[number];
+    type Group = { kind: "single"; attr: Attr } | { kind: "pair"; ella: Attr; el: Attr };
+
+    const ellaAttr = variationAttrs.find((a) => a.slug === "pa_talle-ella");
+    const elAttr = variationAttrs.find((a) => a.slug === "pa_talle-el");
+    const hasPair = !!(ellaAttr && elAttr);
+
+    const groups: Group[] = [];
+    let pairInserted = false;
+
+    for (const attr of variationAttrs) {
+      if (attr.slug === "pa_talle-ella" || attr.slug === "pa_talle-el") {
+        if (hasPair && !pairInserted) {
+          groups.push({ kind: "pair", ella: ellaAttr!, el: elAttr! });
+          pairInserted = true;
+        }
+        // El segundo talle del par se omite (ya está incluido arriba)
+      } else {
+        groups.push({ kind: "single", attr });
+      }
+    }
+
+    return groups;
+  }, [variationAttrs]);
+
   return (
     <div className="mt-4 space-y-5 border-t border-[var(--color-line)] pt-4">
-      {variationAttrs.map((attr) => {
+      {renderGroups.map((group) => {
+        if (group.kind === "pair") {
+          return (
+            <div key="talle-pair" className="grid grid-cols-2 gap-3">
+              <div>
+                <p className="mb-2 text-sm font-semibold text-[var(--color-fg)]">{group.ella.name}</p>
+                <InlineSelect
+                  options={group.ella.options.filter(Boolean)}
+                  selected={selection["pa_talle-ella"] ?? null}
+                  onSelect={(o) => select("pa_talle-ella", o)}
+                  placeholder="Seleccioná"
+                />
+              </div>
+              <div>
+                <p className="mb-2 text-sm font-semibold text-[var(--color-fg)]">{group.el.name}</p>
+                <InlineSelect
+                  options={group.el.options.filter(Boolean)}
+                  selected={selection["pa_talle-el"] ?? null}
+                  onSelect={(o) => select("pa_talle-el", o)}
+                  placeholder="Seleccioná"
+                />
+              </div>
+            </div>
+          );
+        }
+
+        const attr = group.attr;
         const slug = attr.slug!;
         const options = attr.options.filter(Boolean);
         if (options.length === 0) return null;
         const selected = selection[slug] ?? null;
         const isColor = slug === "pa_colores" || /color/i.test(slug);
         const isAcabado = slug === "pa_acabado";
+        const isInlineSelect = slug === "pa_talle-el" || slug === "pa_talle-ella" || slug === "pa_talle";
         const hasColorTerms = isColor && colorTerms.length > 0;
         const hasAcabadoTerms = isAcabado && acabadoTerms.length > 0;
 
         return (
           <Section key={slug} label={attr.name}>
-            {hasColorTerms ? (
+            {isInlineSelect ? (
+              <InlineSelect
+                options={options}
+                selected={selected}
+                onSelect={(o) => select(slug, o)}
+                placeholder={
+                  slug === "pa_talle-el"
+                    ? "Seleccioná talle de él"
+                    : slug === "pa_talle-ella"
+                    ? "Seleccioná talle de ella"
+                    : "Seleccioná talle"
+                }
+              />
+            ) : hasColorTerms ? (
               <ColorPicker
                 options={options}
                 terms={colorTerms}
@@ -203,6 +280,33 @@ function ColorPicker({
         />
       ))}
     </div>
+  );
+}
+
+function InlineSelect({
+  options,
+  selected,
+  onSelect,
+  placeholder,
+}: {
+  options: string[];
+  selected: string | null;
+  onSelect: (val: string) => void;
+  placeholder: string;
+}) {
+  return (
+    <select
+      value={selected ?? ""}
+      onChange={(e) => onSelect(e.target.value)}
+      className="w-full cursor-pointer rounded-lg border border-[var(--color-line)] bg-[var(--color-panel)] px-3 py-2.5 text-sm font-medium text-[var(--color-fg)] transition-colors focus:border-[var(--color-brand)] focus:outline-none focus:ring-1 focus:ring-[var(--color-brand)]"
+    >
+      <option value="">{placeholder}</option>
+      {options.map((o) => (
+        <option key={o} value={o}>
+          {o}
+        </option>
+      ))}
+    </select>
   );
 }
 
