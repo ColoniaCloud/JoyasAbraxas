@@ -137,7 +137,8 @@ export default function ProductVariationSelector({
         const options = attr.options.filter(Boolean);
         if (options.length === 0) return null;
         const selected = selection[slug] ?? null;
-        const isColor = slug === "pa_colores" || /color/i.test(slug);
+        const isColor = slug === "pa_colores" || slug === "colores" || /color/i.test(slug);
+        const isCustomColor = slug === "pa_colores" || slug === "colores";
         const isAcabado = slug === "pa_acabado";
         const isInlineSelect = slug === "pa_talle-el" || slug === "pa_talle-ella" || slug === "pa_talle";
         const hasColorTerms = isColor && colorTerms.length > 0;
@@ -157,6 +158,12 @@ export default function ProductVariationSelector({
                     ? "Seleccioná talle de ella"
                     : "Seleccioná talle"
                 }
+              />
+            ) : isCustomColor ? (
+              <ImageColorPicker
+                options={options}
+                selected={selected}
+                onSelect={(o) => update(slug, o)}
               />
             ) : hasColorTerms ? (
               <ColorPicker
@@ -230,6 +237,66 @@ function ToggleButton({
     >
       {children}
     </button>
+  );
+}
+
+const COLOR_IMAGE_MAP: Record<string, string> = {
+  violeta: "https://api.joyasabraxas.com/wp-content/uploads/2026/06/Violeta.png",
+  verde: "https://api.joyasabraxas.com/wp-content/uploads/2026/06/Verde.png",
+  rosada: "https://api.joyasabraxas.com/wp-content/uploads/2026/06/Rosado.png",
+  rosado: "https://api.joyasabraxas.com/wp-content/uploads/2026/06/Rosado.png",
+  roja: "https://api.joyasabraxas.com/wp-content/uploads/2026/06/Rojo.png",
+  rojo: "https://api.joyasabraxas.com/wp-content/uploads/2026/06/Rojo.png",
+  negra: "https://api.joyasabraxas.com/wp-content/uploads/2026/06/Negra.png",
+  negro: "https://api.joyasabraxas.com/wp-content/uploads/2026/06/Negra.png",
+  transparente: "https://api.joyasabraxas.com/wp-content/uploads/2026/06/Cristal.png",
+  cristal: "https://api.joyasabraxas.com/wp-content/uploads/2026/06/Cristal.png",
+  azul: "https://api.joyasabraxas.com/wp-content/uploads/2026/06/Azul.png",
+  amarilla: "https://api.joyasabraxas.com/wp-content/uploads/2026/06/Amarillo.png",
+  amarillo: "https://api.joyasabraxas.com/wp-content/uploads/2026/06/Amarillo.png",
+  marina: "https://api.joyasabraxas.com/wp-content/uploads/2026/06/Agua.png",
+  agua: "https://api.joyasabraxas.com/wp-content/uploads/2026/06/Agua.png",
+};
+
+function ImageColorPicker({
+  options,
+  selected,
+  onSelect,
+}: {
+  options: string[];
+  selected: string | null;
+  onSelect: (name: string) => void;
+}) {
+  return (
+    <div className="flex flex-wrap gap-2.5">
+      {options.map((name) => {
+        const key = name.trim().toLowerCase();
+        const imageUrl = COLOR_IMAGE_MAP[key];
+        const isSelected = selected === name;
+        const style: React.CSSProperties = {
+          backgroundImage: imageUrl ? `url(${imageUrl})` : undefined,
+          backgroundColor: imageUrl ? undefined : (COLOR_HEX_FALLBACK[name] || "#d1d5db"),
+          width: "35px",
+          height: "35px",
+          borderRadius: "50%",
+        };
+
+        return (
+          <button
+            key={name}
+            type="button"
+            title={name}
+            onClick={() => onSelect(name)}
+            style={style}
+            className={`cursor-pointer bg-cover bg-center transition-all duration-200 border-2 ${
+              isSelected
+                ? "border-[#ec4899] scale-105 shadow-sm"
+                : "border-transparent hover:border-[#ec4899] hover:scale-105"
+            }`}
+          />
+        );
+      })}
+    </div>
   );
 }
 
