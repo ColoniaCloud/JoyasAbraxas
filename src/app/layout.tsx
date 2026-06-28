@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Geist, Cormorant_Garamond } from "next/font/google";
 import { cn } from "@/lib/utils";
@@ -40,6 +40,10 @@ export const metadata: Metadata = {
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#200e0d",
 };
 
 export default async function RootLayout({

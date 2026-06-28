@@ -19,12 +19,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 	let postEntries: MetadataRoute.Sitemap = [];
 
 	try {
-		const result = await fetchProducts({ perPage: 100 });
-		productEntries = result.data.map((p) => ({
-			url: `${SITE_URL}/productos/${p.slug}`,
-			changeFrequency: "weekly" as const,
-			priority: 0.8,
-		}));
+		let page = 1;
+		let hasMore = true;
+		while (hasMore) {
+			const result = await fetchProducts({ perPage: 100, page });
+			const entries = result.data.map((p) => ({
+				url: `${SITE_URL}/productos/${p.slug}`,
+				changeFrequency: "weekly" as const,
+				priority: 0.8,
+			}));
+			productEntries.push(...entries);
+			if (page >= result.totalPages) {
+				hasMore = false;
+			} else {
+				page++;
+			}
+		}
 	} catch {
 		// API no disponible
 	}

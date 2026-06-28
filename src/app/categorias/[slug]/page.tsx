@@ -1,4 +1,5 @@
 import { fetchCategoryBySlug, fetchProducts } from "@/lib/wp";
+import { breadcrumbJsonLd } from "@/lib/structured-data";
 import type { Metadata } from "next";
 import Link from "next/link";
 import ProductCard from "@/components/product-card";
@@ -61,6 +62,18 @@ export default async function CategoriaDetailPage({ params }: Props) {
 
   return (
     <main className="mx-auto max-w-[1080px] px-4 py-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            breadcrumbJsonLd([
+              { name: "Inicio", href: "/" },
+              { name: "Categorías", href: "/categorias" },
+              { name: category.name, href: `/categorias/${category.slug}` },
+            ])
+          ),
+        }}
+      />
       <Breadcrumbs
         items={[
           { label: "Inicio", href: "/" },
