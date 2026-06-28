@@ -66,15 +66,25 @@ export default function ProductPurchasePanel({
   const [variation, setVariation] = useState<VariationState | null>(null);
   const [persInputs, setPersInputs] = useState<Record<string, string>>({});
   const [grabado, setGrabado] = useState("");
+  const [grabadoEl, setGrabadoEl] = useState("");
+  const [grabadoElla, setGrabadoElla] = useState("");
   const [note, setNote] = useState("");
   const [added, setAdded] = useState(false);
 
-  const isCustomGrabadoProduct = useMemo(() => {
+  const dialogRef = useRef<HTMLDialogElement>(null);
+
+  const isAlianzas = useMemo(() => {
     return product.categories?.some(
       (cat) =>
         cat.slug === "alianzas" ||
+        cat.name.toLowerCase() === "alianzas",
+    ) ?? false;
+  }, [product.categories]);
+
+  const isEsclavas = useMemo(() => {
+    return product.categories?.some(
+      (cat) =>
         cat.slug === "esclavas" ||
-        cat.name.toLowerCase() === "alianzas" ||
         cat.name.toLowerCase() === "esclavas",
     ) ?? false;
   }, [product.categories]);
@@ -142,8 +152,17 @@ export default function ProductPurchasePanel({
       .map((f) => ({ label: f.etiqueta, value: (persInputs[f.etiqueta] ?? "").trim() }))
       .filter((p) => p.value);
 
-    if (isCustomGrabadoProduct && grabado.trim()) {
+    if (isEsclavas && grabado.trim()) {
       personalization.push({ label: "Grabado", value: grabado.trim() });
+    }
+
+    if (isAlianzas) {
+      if (grabadoEl.trim()) {
+        personalization.push({ label: "Grabado Él", value: grabadoEl.trim() });
+      }
+      if (grabadoElla.trim()) {
+        personalization.push({ label: "Grabado Ella", value: grabadoElla.trim() });
+      }
     }
 
     if (personalization.length) customization.personalization = personalization;
@@ -198,7 +217,7 @@ export default function ProductPurchasePanel({
         </div>
       )}
 
-      {isCustomGrabadoProduct && (
+      {isEsclavas && (
         <div className="space-y-1.5 border-t border-[var(--color-line)] pt-4">
           <div className="flex justify-between items-center">
             <span className="text-sm font-semibold text-[var(--color-fg)]">Grabado personalizado</span>
@@ -242,6 +261,25 @@ export default function ProductPurchasePanel({
           <p className="text-[11px] text-[var(--color-muted)]">
             Solo letras, números y los símbolos ♥ u ∞. Opcional.
           </p>
+        </div>
+      )}
+
+      {isAlianzas && (
+        <div className="border-t border-[var(--color-line)] pt-4">
+          <button
+            type="button"
+            onClick={() => dialogRef.current?.showModal()}
+            className="w-full rounded-[9px] border border-[var(--color-brand)] bg-transparent py-2.5 text-sm font-semibold text-[var(--color-brand)] hover:bg-[var(--color-brand)] hover:text-[#f6fffb] transition-all cursor-pointer"
+          >
+            AGREGAR GRABADO GRATIS
+          </button>
+          {(grabadoEl.trim() || grabadoElla.trim()) && (
+            <div className="mt-2 rounded-lg bg-[var(--color-panel)] border border-[var(--color-line)] p-2.5 text-xs text-[var(--color-fg)]">
+              <p className="font-semibold mb-1 text-[var(--color-brand)]">Grabado configurado:</p>
+              {grabadoEl.trim() && <p>• Él: <span className="font-medium italic">"{grabadoEl}"</span></p>}
+              {grabadoElla.trim() && <p>• Ella: <span className="font-medium italic">"{grabadoElla}"</span></p>}
+            </div>
+          )}
         </div>
       )}
 
@@ -309,6 +347,121 @@ export default function ProductPurchasePanel({
         </button>
       </div>
     </div>
+
+    {/* Modal de Grabado para Alianzas */}
+    <dialog
+      ref={dialogRef}
+      className="rounded-2xl border border-[var(--color-line)] bg-[var(--color-panel)] p-6 shadow-2xl backdrop:bg-black/60 backdrop:backdrop-blur-sm max-w-md w-[90%] focus:outline-none"
+    >
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-base font-bold text-[var(--color-fg)]">Grabado de Alianzas</h3>
+          <button
+            type="button"
+            onClick={() => dialogRef.current?.close()}
+            className="text-[var(--color-muted)] hover:text-[var(--color-fg)] cursor-pointer text-xl font-bold border-0 bg-transparent"
+          >
+            &times;
+          </button>
+        </div>
+
+        <div className="space-y-3.5">
+          {/* Grabado Él */}
+          <div className="space-y-1.5">
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-semibold text-[var(--color-fg)]">Grabado Él</span>
+              <span className="text-xs text-[var(--color-muted)]">{grabadoEl.length}/12</span>
+            </div>
+            <div className="relative flex items-center">
+              <input
+                type="text"
+                value={grabadoEl}
+                onChange={(e) => setGrabadoEl(cleanGrabadoValue(e.target.value))}
+                placeholder="Grabado Él (opcional)"
+                className="w-full rounded-[9px] border border-[var(--color-line)] bg-[var(--color-bg)] py-2.5 pl-3 pr-20 font-[inherit] font-normal text-base sm:text-sm text-[var(--color-fg)] focus:border-[var(--color-brand)] focus:outline-none"
+              />
+              <div className="absolute right-2 flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (grabadoEl.length < 12) {
+                      setGrabadoEl(cleanGrabadoValue(grabadoEl + "♥"));
+                    }
+                  }}
+                  className="flex h-7 w-7 cursor-pointer items-center justify-center rounded bg-[var(--color-panel)] text-sm text-[var(--color-brand)] border border-[var(--color-line)] hover:border-[var(--color-brand)] transition-colors"
+                >
+                  ♥
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (grabadoEl.length < 12) {
+                      setGrabadoEl(cleanGrabadoValue(grabadoEl + "∞"));
+                    }
+                  }}
+                  className="flex h-7 w-7 cursor-pointer items-center justify-center rounded bg-[var(--color-panel)] text-sm text-[var(--color-fg)] border border-[var(--color-line)] hover:border-[var(--color-brand)] transition-colors"
+                >
+                  ∞
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Grabado Ella */}
+          <div className="space-y-1.5">
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-semibold text-[var(--color-fg)]">Grabado Ella</span>
+              <span className="text-xs text-[var(--color-muted)]">{grabadoElla.length}/12</span>
+            </div>
+            <div className="relative flex items-center">
+              <input
+                type="text"
+                value={grabadoElla}
+                onChange={(e) => setGrabadoElla(cleanGrabadoValue(e.target.value))}
+                placeholder="Grabado Ella (opcional)"
+                className="w-full rounded-[9px] border border-[var(--color-line)] bg-[var(--color-bg)] py-2.5 pl-3 pr-20 font-[inherit] font-normal text-base sm:text-sm text-[var(--color-fg)] focus:border-[var(--color-brand)] focus:outline-none"
+              />
+              <div className="absolute right-2 flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (grabadoElla.length < 12) {
+                      setGrabadoElla(cleanGrabadoValue(grabadoElla + "♥"));
+                    }
+                  }}
+                  className="flex h-7 w-7 cursor-pointer items-center justify-center rounded bg-[var(--color-panel)] text-sm text-[var(--color-brand)] border border-[var(--color-line)] hover:border-[var(--color-brand)] transition-colors"
+                >
+                  ♥
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (grabadoElla.length < 12) {
+                      setGrabadoElla(cleanGrabadoValue(grabadoElla + "∞"));
+                    }
+                  }}
+                  className="flex h-7 w-7 cursor-pointer items-center justify-center rounded bg-[var(--color-panel)] text-sm text-[var(--color-fg)] border border-[var(--color-line)] hover:border-[var(--color-brand)] transition-colors"
+                >
+                  ∞
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p className="text-[11px] text-[var(--color-muted)] leading-relaxed">
+          Cada grabado permite hasta 12 caracteres (solo letras, números y los símbolos ♥ u ∞).
+        </p>
+
+        <button
+          type="button"
+          onClick={() => dialogRef.current?.close()}
+          className="w-full rounded-[9px] border-0 bg-[var(--color-brand)] p-3 font-[inherit] font-bold text-[#f6fffb] transition-colors cursor-pointer hover:bg-[var(--color-brand-strong)] text-sm"
+        >
+          Listo
+        </button>
+      </div>
+    </dialog>
     </>
   );
 }
