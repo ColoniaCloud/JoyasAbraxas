@@ -25,7 +25,7 @@ function loadCart(): CartItem[] {
     const parsed = raw ? (JSON.parse(raw) as CartItem[]) : [];
     // Compatibilidad: items viejos sin `key` reciben una derivada del producto.
     return parsed.map((i) =>
-      i.key ? i : { ...i, key: lineKey(i.product.id, i.customization?.variationId) },
+      i.key ? i : { ...i, key: lineKey(i.product.id, i.customization?.variationId, i.customization) },
     );
   } catch {
     return [];
@@ -51,7 +51,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const addItem = useCallback(
     (product: WPProduct, quantity = 1, customization?: ProductCustomization) => {
-      const key = lineKey(product.id, customization?.variationId);
+      const key = lineKey(product.id, customization?.variationId, customization);
       setItems((prev) => {
         const existing = prev.find((i) => i.key === key);
         if (existing) {

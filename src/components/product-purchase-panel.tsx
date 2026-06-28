@@ -47,6 +47,12 @@ function getPersonalizationFields(product: WPProduct): PersField[] {
     .filter((f) => f.etiqueta);
 }
 
+function cleanGrabadoValue(val: string): string {
+  // Solo letras (incl. acentos/ñ), números, espacios, ♥ y ∞
+  const cleaned = val.replace(/[^a-zA-Z0-9áéíóúüñÁÉÍÓÚÜÑ\s♥∞]/g, "");
+  return cleaned.slice(0, 12);
+}
+
 export default function ProductPurchasePanel({
   product,
   variations,
@@ -59,8 +65,19 @@ export default function ProductPurchasePanel({
 
   const [variation, setVariation] = useState<VariationState | null>(null);
   const [persInputs, setPersInputs] = useState<Record<string, string>>({});
+  const [grabado, setGrabado] = useState("");
   const [note, setNote] = useState("");
   const [added, setAdded] = useState(false);
+
+  const isCustomGrabadoProduct = useMemo(() => {
+    return product.categories?.some(
+      (cat) =>
+        cat.slug === "alianzas" ||
+        cat.slug === "esclavas" ||
+        cat.name.toLowerCase() === "alianzas" ||
+        cat.name.toLowerCase() === "esclavas",
+    ) ?? false;
+  }, [product.categories]);
 
   // Barra sticky móvil: visible solo cuando el botón inline sale de pantalla
   const inlineBtnRef = useRef<HTMLButtonElement>(null);
@@ -124,6 +141,11 @@ export default function ProductPurchasePanel({
     const personalization = persFields
       .map((f) => ({ label: f.etiqueta, value: (persInputs[f.etiqueta] ?? "").trim() }))
       .filter((p) => p.value);
+
+    if (isCustomGrabadoProduct && grabado.trim()) {
+      personalization.push({ label: "Grabado", value: grabado.trim() });
+    }
+
     if (personalization.length) customization.personalization = personalization;
 
     const trimmedNote = note.trim();
@@ -173,6 +195,53 @@ export default function ProductPurchasePanel({
               />
             </label>
           ))}
+        </div>
+      )}
+
+      {isCustomGrabadoProduct && (
+        <div className="space-y-1.5 border-t border-[var(--color-line)] pt-4">
+          <div className="flex justify-between items-center">
+            <span className="text-sm font-semibold text-[var(--color-fg)]">Grabado personalizado</span>
+            <span className="text-xs text-[var(--color-muted)]">{grabado.length}/12 caracteres</span>
+          </div>
+          <div className="relative flex items-center">
+            <input
+              type="text"
+              value={grabado}
+              onChange={(e) => setGrabado(cleanGrabadoValue(e.target.value))}
+              placeholder="Grabado (máx. 12 caracteres)"
+              className="w-full rounded-[9px] border border-[var(--color-line)] bg-[var(--color-bg)] py-2.5 pl-3 pr-20 font-[inherit] font-normal text-base sm:text-sm text-[var(--color-fg)] focus:border-[var(--color-brand)] focus:outline-none"
+            />
+            <div className="absolute right-2 flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => {
+                  if (grabado.length < 12) {
+                    setGrabado(cleanGrabadoValue(grabado + "♥"));
+                  }
+                }}
+                className="flex h-7 w-7 cursor-pointer items-center justify-center rounded bg-[var(--color-panel)] text-sm text-[var(--color-brand)] border border-[var(--color-line)] hover:border-[var(--color-brand)] transition-colors"
+                title="Insertar corazón"
+              >
+                ♥
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (grabado.length < 12) {
+                    setGrabado(cleanGrabadoValue(grabado + "∞"));
+                  }
+                }}
+                className="flex h-7 w-7 cursor-pointer items-center justify-center rounded bg-[var(--color-panel)] text-sm text-[var(--color-fg)] border border-[var(--color-line)] hover:border-[var(--color-brand)] transition-colors"
+                title="Insertar infinito"
+              >
+                ∞
+              </button>
+            </div>
+          </div>
+          <p className="text-[11px] text-[var(--color-muted)]">
+            Solo letras, números y los símbolos ♥ u ∞. Opcional.
+          </p>
         </div>
       )}
 

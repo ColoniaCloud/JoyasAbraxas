@@ -1,8 +1,19 @@
 import type { CartItem, ProductCustomization } from "./types";
 
 /** Clave única de línea de carrito: distingue variaciones del mismo producto. */
-export function lineKey(productId: number, variationId?: number): string {
-	return `${productId}:${variationId ?? 0}`;
+export function lineKey(
+	productId: number,
+	variationId?: number,
+	customization?: ProductCustomization,
+): string {
+	let key = `${productId}:${variationId ?? 0}`;
+	if (customization?.personalization?.length) {
+		const serialized = customization.personalization
+			.map((p) => `${p.label}=${p.value}`)
+			.join(";");
+		key += `:${serialized}`;
+	}
+	return key;
 }
 
 /** Precio unitario real de una línea: el de la variación si existe, si no el del producto. */
