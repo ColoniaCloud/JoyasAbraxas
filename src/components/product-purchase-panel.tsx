@@ -351,15 +351,22 @@ export default function ProductPurchasePanel({
     {/* Modal de Grabado para Alianzas */}
     <dialog
       ref={dialogRef}
-      className="rounded-2xl border border-[var(--color-line)] bg-[var(--color-panel)] p-6 shadow-2xl backdrop:bg-black/60 backdrop:backdrop-blur-sm max-w-md w-[90%] focus:outline-none"
+      className="rounded-2xl border border-[var(--color-line)] bg-[var(--color-panel)] p-6 shadow-2xl backdrop:bg-black/60 backdrop:backdrop-blur-sm max-w-md w-[90%] focus:outline-none text-[var(--color-ink)]"
+      style={{
+        position: "fixed",
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+        margin: 0,
+      }}
     >
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-base font-bold text-[var(--color-fg)]">Grabado de Alianzas</h3>
+          <h3 className="text-base font-bold text-[var(--color-ink)]">Grabado de Alianzas</h3>
           <button
             type="button"
             onClick={() => dialogRef.current?.close()}
-            className="text-[var(--color-muted)] hover:text-[var(--color-fg)] cursor-pointer text-xl font-bold border-0 bg-transparent"
+            className="text-[var(--color-muted)] hover:text-[var(--color-ink)] cursor-pointer text-xl font-bold border-0 bg-transparent"
           >
             &times;
           </button>
@@ -369,8 +376,8 @@ export default function ProductPurchasePanel({
           {/* Grabado Él */}
           <div className="space-y-1.5">
             <div className="flex justify-between items-center">
-              <span className="text-sm font-semibold text-[var(--color-fg)]">Grabado Él</span>
-              <span className="text-xs text-[var(--color-muted)]">{grabadoEl.length}/12</span>
+              <span className="text-sm font-semibold text-[var(--color-ink)]">Grabado Él</span>
+              <span className="text-xs text-[var(--color-ink)] opacity-60">{grabadoEl.length}/12</span>
             </div>
             <div className="relative flex items-center">
               <input
@@ -378,7 +385,7 @@ export default function ProductPurchasePanel({
                 value={grabadoEl}
                 onChange={(e) => setGrabadoEl(cleanGrabadoValue(e.target.value))}
                 placeholder="Grabado Él (opcional)"
-                className="w-full rounded-[9px] border border-[var(--color-line)] bg-[var(--color-bg)] py-2.5 pl-3 pr-20 font-[inherit] font-normal text-base sm:text-sm text-[var(--color-fg)] focus:border-[var(--color-brand)] focus:outline-none"
+                className="w-full rounded-[9px] border border-[var(--color-line)] bg-[var(--color-bg)] py-2.5 pl-3 pr-20 font-[inherit] font-normal text-base sm:text-sm text-[var(--color-ink)] focus:border-[var(--color-brand)] focus:outline-none"
               />
               <div className="absolute right-2 flex items-center gap-1">
                 <button
@@ -410,8 +417,8 @@ export default function ProductPurchasePanel({
           {/* Grabado Ella */}
           <div className="space-y-1.5">
             <div className="flex justify-between items-center">
-              <span className="text-sm font-semibold text-[var(--color-fg)]">Grabado Ella</span>
-              <span className="text-xs text-[var(--color-muted)]">{grabadoElla.length}/12</span>
+              <span className="text-sm font-semibold text-[var(--color-ink)]">Grabado Ella</span>
+              <span className="text-xs text-[var(--color-ink)] opacity-60">{grabadoElla.length}/12</span>
             </div>
             <div className="relative flex items-center">
               <input
@@ -419,7 +426,7 @@ export default function ProductPurchasePanel({
                 value={grabadoElla}
                 onChange={(e) => setGrabadoElla(cleanGrabadoValue(e.target.value))}
                 placeholder="Grabado Ella (opcional)"
-                className="w-full rounded-[9px] border border-[var(--color-line)] bg-[var(--color-bg)] py-2.5 pl-3 pr-20 font-[inherit] font-normal text-base sm:text-sm text-[var(--color-fg)] focus:border-[var(--color-brand)] focus:outline-none"
+                className="w-full rounded-[9px] border border-[var(--color-line)] bg-[var(--color-bg)] py-2.5 pl-3 pr-20 font-[inherit] font-normal text-base sm:text-sm text-[var(--color-ink)] focus:border-[var(--color-brand)] focus:outline-none"
               />
               <div className="absolute right-2 flex items-center gap-1">
                 <button
@@ -449,7 +456,7 @@ export default function ProductPurchasePanel({
           </div>
         </div>
 
-        <p className="text-[11px] text-[var(--color-muted)] leading-relaxed">
+        <p className="text-[11px] text-[var(--color-ink)] opacity-70 leading-relaxed">
           Cada grabado permite hasta 12 caracteres (solo letras, números y los símbolos ♥ u ∞).
         </p>
 
