@@ -46,6 +46,11 @@ export function trackAddToCart(item: AnalyticsItem) {
     value,
     currency: CURRENCY,
   });
+  window.twq?.("event", "AddToCart", {
+    value,
+    currency: CURRENCY,
+    content_ids: [String(item.id)],
+  });
 }
 
 export function trackBeginCheckout(items: AnalyticsItem[], value: number) {
@@ -61,6 +66,11 @@ export function trackBeginCheckout(items: AnalyticsItem[], value: number) {
     num_items: numItems(items),
     value,
     currency: CURRENCY,
+  });
+  window.twq?.("event", "InitiateCheckout", {
+    value,
+    currency: CURRENCY,
+    content_ids: items.map((i) => String(i.id)),
   });
 }
 
@@ -82,5 +92,11 @@ export function trackPurchase(opts: {
     num_items: numItems(opts.items),
     value: opts.value,
     currency: CURRENCY,
+  });
+  window.twq?.("event", "Purchase", {
+    value: opts.value,
+    currency: CURRENCY,
+    content_ids: opts.items.map((i) => String(i.id)),
+    conversion_id: String(opts.orderId),
   });
 }

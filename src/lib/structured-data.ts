@@ -36,11 +36,32 @@ export function productJsonLd(product: WPProduct) {
 		"@type": "Offer",
 		priceCurrency: "UYU",
 		price: product.price,
+		priceValidUntil: `${new Date().getFullYear() + 1}-12-31`,
 		availability:
 			product.stock_status === "instock"
 				? "https://schema.org/InStock"
 				: "https://schema.org/OutOfStock",
 		url: `${SITE_URL}/productos/${product.slug}`,
+		shippingDetails: {
+			"@type": "OfferShippingDetails",
+			shippingRate: {
+				"@type": "MonetaryAmount",
+				value: 0,
+				currency: "UYU",
+			},
+			shippingDestination: {
+				"@type": "DefinedRegion",
+				addressCountry: "UY",
+			},
+		},
+		hasMerchantReturnPolicy: {
+			"@type": "MerchantReturnPolicy",
+			applicableCountry: "UY",
+			returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnPeriod",
+			merchantReturnDays: 30,
+			returnMethod: "https://schema.org/ReturnByMail",
+			returnFees: "https://schema.org/FreeReturn",
+		},
 	};
 
 	return {
@@ -50,6 +71,11 @@ export function productJsonLd(product: WPProduct) {
 		description: product.short_description?.replace(/<[^>]+>/g, "").slice(0, 300),
 		image: product.images.map((img) => img.src),
 		sku: product.sku || undefined,
+		mpn: product.sku || String(product.id),
+		brand: {
+			"@type": "Brand",
+			name: "Abraxas",
+		},
 		offers,
 		...(product.rating_count > 0 && {
 			aggregateRating: {

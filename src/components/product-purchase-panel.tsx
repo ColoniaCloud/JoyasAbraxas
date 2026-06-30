@@ -72,6 +72,7 @@ export default function ProductPurchasePanel({
   const [added, setAdded] = useState(false);
 
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const shippingDialogRef = useRef<HTMLDialogElement>(null);
 
   const isAlianzas = useMemo(() => {
     return product.categories?.some(
@@ -319,6 +320,16 @@ export default function ProductPurchasePanel({
       >
         {buttonLabel}
       </button>
+
+      <div className="flex justify-center mt-2.5">
+        <button
+          type="button"
+          onClick={() => shippingDialogRef.current?.showModal()}
+          className="inline-flex items-center gap-1.5 text-xs font-medium text-[var(--color-muted)] hover:text-[var(--color-brand)] transition-colors cursor-pointer border-0 bg-transparent p-0 underline decoration-dotted underline-offset-4"
+        >
+          Nuestros métodos de envío
+        </button>
+      </div>
     </div>
 
     {/* Barra de compra fija en móvil — aparece al perder de vista el botón inline */}
@@ -466,6 +477,72 @@ export default function ProductPurchasePanel({
           className="w-full rounded-[9px] border-0 bg-[var(--color-brand)] p-3 font-[inherit] font-bold text-[#f6fffb] transition-colors cursor-pointer hover:bg-[var(--color-brand-strong)] text-sm"
         >
           Listo
+        </button>
+      </div>
+    </dialog>
+
+    {/* Modal de Métodos de Envío */}
+    <dialog
+      ref={shippingDialogRef}
+      className="rounded-2xl border border-[var(--color-line)] bg-[var(--color-panel)] p-6 shadow-2xl backdrop:bg-black/60 backdrop:backdrop-blur-sm max-w-md w-[90%] focus:outline-none text-[var(--color-ink)]"
+      style={{
+        position: "fixed",
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+        margin: 0,
+      }}
+    >
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-base font-bold text-[var(--color-ink)]">Métodos de Envío</h3>
+          <button
+            type="button"
+            onClick={() => shippingDialogRef.current?.close()}
+            className="text-[var(--color-muted)] hover:text-[var(--color-ink)] cursor-pointer text-xl font-bold border-0 bg-transparent"
+          >
+            &times;
+          </button>
+        </div>
+
+        <div className="space-y-4 text-sm text-[var(--color-muted)] leading-relaxed">
+          <p>
+            Información importante sobre la entrega de tus piezas:
+          </p>
+
+          <div className="space-y-4 divide-y divide-[var(--color-line)]">
+            <div className="pt-0">
+              <h4 className="font-semibold text-[var(--color-ink)] mb-1">📍 Montevideo</h4>
+              <ul className="list-disc pl-5 space-y-1.5">
+                <li>Envíos por cadetería privada a domicilio: <strong>$200 a $400</strong> según la zona.</li>
+                <li><strong>Envío GRATIS</strong> en compras mayores a <strong>$3.000</strong> con entrega en un plazo máximo de <strong>24 horas</strong>.</li>
+              </ul>
+            </div>
+
+            <div className="pt-3.5">
+              <h4 className="font-semibold text-[var(--color-ink)] mb-1">🇺🇾 Interior del país</h4>
+              <ul className="list-disc pl-5 space-y-1.5">
+                <li>Despacho por <strong>DAC sin costo de cadetería</strong> en Tres Cruces en un plazo de <strong>48 horas</strong> máximo.</li>
+                <li>El costo del envío de la agencia a cobrar en destino es de <strong>$280</strong>.</li>
+                <li><strong>Envío GRATIS</strong> (costo de agencia cubierto) en compras mayores a <strong>$3.000</strong>.</li>
+              </ul>
+            </div>
+
+            <div className="pt-3.5">
+              <h4 className="font-semibold text-[var(--color-ink)] mb-1">⏳ Tiempo de elaboración</h4>
+              <p className="mt-1">
+                Si la pieza requiere fabricación personalizada o es por encargo, los plazos de envío comenzarán a regir una vez que la joya esté totalmente terminada en el taller.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => shippingDialogRef.current?.close()}
+          className="mt-2 w-full cursor-pointer rounded-[9px] border-0 bg-[var(--color-brand)] p-3 font-[inherit] font-bold text-[#f6fffb] hover:bg-[var(--color-brand-strong)] transition-colors text-sm"
+        >
+          Entendido
         </button>
       </div>
     </dialog>

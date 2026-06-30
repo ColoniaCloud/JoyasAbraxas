@@ -131,7 +131,31 @@ export default function Footer() {
 				</div>
 
 				<div className="mt-10 border-t border-[var(--color-line)] pt-6 text-center text-xs text-[var(--color-muted)]">
-					© {new Date().getFullYear()} Abraxas Joyería. Todos los derechos reservados.
+					<div className="mb-4 flex flex-wrap justify-center gap-x-6 gap-y-2 text-[11px] text-[var(--color-muted)]">
+						<Link
+							href="/politica-de-privacidad"
+							className="transition-colors hover:text-[var(--color-brand)]"
+						>
+							Política de Privacidad
+						</Link>
+						<span>·</span>
+						<Link
+							href="/terminos-y-condiciones"
+							className="transition-colors hover:text-[var(--color-brand)]"
+						>
+							Términos y Condiciones
+						</Link>
+						<span>·</span>
+						<Link
+							href="/envios-y-devoluciones"
+							className="transition-colors hover:text-[var(--color-brand)]"
+						>
+							Envíos y Devoluciones
+						</Link>
+					</div>
+					<div>
+						© {new Date().getFullYear()} Abraxas Joyería. Todos los derechos reservados.
+					</div>
 				</div>
 			</div>
 		</footer>

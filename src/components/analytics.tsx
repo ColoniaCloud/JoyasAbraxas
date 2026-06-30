@@ -6,11 +6,13 @@ import { useEffect, useRef } from "react";
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 const FB_PIXEL_ID = process.env.NEXT_PUBLIC_FB_PIXEL_ID;
+const TWITTER_PIXEL_ID = process.env.NEXT_PUBLIC_TWITTER_PIXEL_ID;
 
 declare global {
   interface Window {
     gtag?: (...args: unknown[]) => void;
     fbq?: (...args: unknown[]) => void;
+    twq?: (...args: unknown[]) => void;
   }
 }
 
@@ -36,6 +38,7 @@ export default function Analytics() {
       page_location: url,
     });
     window.fbq?.("track", "PageView");
+    window.twq?.("event", "PageView", {});
   }, [pathname]);
 
   return (
@@ -67,6 +70,15 @@ s.parentNode.insertBefore(t,s)}(window, document,'script',
 'https://connect.facebook.net/en_US/fbevents.js');
 fbq('init', '${FB_PIXEL_ID}');
 fbq('track', 'PageView');`}
+        </Script>
+      )}
+
+      {TWITTER_PIXEL_ID && (
+        <Script id="twitter-pixel-init" strategy="afterInteractive">
+          {`!function(e,t,n,s,u,a){e.twq||(s=e.twq=function(){s.exe?s.exe.apply(s,arguments):s.queue.push(arguments)
+},s.version='1.1',s.queue=[],u=t.createElement(n),u.async=!0,u.src='https://static.ads-twitter.com/uwt.js',
+a=t.getElementsByTagName(n)[0],a.parentNode.insertBefore(u,a))}(window,document,'script');
+twq('config','${TWITTER_PIXEL_ID}');`}
         </Script>
       )}
     </>
