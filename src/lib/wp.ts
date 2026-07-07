@@ -37,7 +37,7 @@ async function wcGet<T>(path: string, revalidate = 1800): Promise<T> {
 }
 
 export async function fetchProducts({ perPage = 12, category, onSale, page = 1, search }: { perPage?: number; category?: number; onSale?: boolean; page?: number; search?: string } = {}) {
-	let path = `/wp-json/wc/v3/products?per_page=${perPage}&page=${page}`;
+	let path = `/wp-json/wc/v3/products?per_page=${perPage}&page=${page}&status=publish`;
 	if (category) path += `&category=${category}`;
 	if (onSale) path += `&on_sale=true`;
 	if (search) path += `&search=${encodeURIComponent(search)}`;
@@ -61,11 +61,13 @@ export async function fetchProducts({ perPage = 12, category, onSale, page = 1, 
 }
 
 export async function fetchProduct(id: number) {
-	return wcGet<WPProduct>(`/wp-json/wc/v3/products/${id}`, 900);
+	const product = await wcGet<WPProduct>(`/wp-json/wc/v3/products/${id}`, 900);
+	if (product.status !== 'publish') throw new Error('Producto no encontrado');
+	return product;
 }
 
 export async function fetchProductBySlug(slug: string) {
-	const results = await wcGet<WPProduct[]>(`/wp-json/wc/v3/products?slug=${encodeURIComponent(slug)}`, 900);
+	const results = await wcGet<WPProduct[]>(`/wp-json/wc/v3/products?slug=${encodeURIComponent(slug)}&status=publish`, 900);
 	if (!results.length) throw new Error('Producto no encontrado');
 	return results[0];
 }
