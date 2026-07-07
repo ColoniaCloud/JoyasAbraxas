@@ -31,3 +31,6 @@ tsconfig.tsbuildinfo
 🟢-MEMORY.md
 🟢-joyeria-abraxas-variaciones-acf.md
 sesion-*.md
+
+# Markdown docs (no versionar)
+*.md
