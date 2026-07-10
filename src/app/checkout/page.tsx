@@ -7,6 +7,7 @@ import { trackBeginCheckout } from "@/lib/analytics";
 import type { CheckoutRequest, PaymentMethod } from "@/lib/types/checkout";
 import { Building2, CreditCard, LogIn, ShieldCheck, UserCheck } from "lucide-react";
 import PromoBanner from "@/components/promo-banner";
+import ShippingProgress from "@/components/shipping-progress";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
@@ -247,6 +248,7 @@ export default function CheckoutPage() {
             </div>
             <div className="flex justify-between pt-3 text-sm text-[var(--color-muted)]"><span>Productos ({totalItems})</span><span>{formatPrice(totalPrice)}</span></div>
             <div className="mt-2 flex justify-between text-lg font-bold"><span>Total</span><span>{formatPrice(totalPrice)}</span></div>
+            <ShippingProgress total={totalPrice} />
             <p className="mt-4 text-center text-xs text-[var(--color-muted)]">Pago seguro procesado por MercadoPago</p>
           </aside>
         </div>
@@ -384,6 +386,7 @@ export default function CheckoutPage() {
             <div className="flex justify-between text-sm text-[var(--color-brand)]"><span>Descuento transferencia (10%)</span><span>-{formatPrice(bankDiscount)}</span></div>
           )}
           <div className="mt-2 flex justify-between text-lg font-bold"><span>Total</span><span>{formatPrice(displayTotal)}</span></div>
+          <ShippingProgress total={displayTotal} />
           <button type="submit" form="checkout-form" disabled={loading || (!loggedUser && accountMode === "idle") || accountMode === "login"} className="mt-4 w-full cursor-pointer rounded-[9px] border-0 bg-[var(--color-brand)] p-3 font-[inherit] font-bold text-[#f6fffb] transition-colors hover:bg-[var(--color-brand-strong)] disabled:cursor-not-allowed disabled:opacity-50">
             {loading ? "Procesando..." : paymentMethod === "mercadopago" ? "Continuar al pago" : "Confirmar pedido"}
           </button>

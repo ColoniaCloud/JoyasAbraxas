@@ -6,6 +6,7 @@ import { formatPrice } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import PromoBanner from "@/components/promo-banner";
+import ShippingProgress from "@/components/shipping-progress";
 
 export default function CarritoPage() {
   const { items, removeItem, updateQuantity, totalItems, totalPrice, clearCart } = useCart();
@@ -117,6 +118,7 @@ export default function CarritoPage() {
               <span>Total</span>
               <span>{formatPrice(totalPrice)}</span>
             </div>
+            <ShippingProgress total={totalPrice} />
             <Link
               href="/checkout"
               className="mt-4 block w-full rounded-[9px] bg-[var(--color-brand)] p-3 text-center font-bold text-[#f6fffb] transition-colors hover:bg-[var(--color-brand-strong)]"

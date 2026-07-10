@@ -153,8 +153,19 @@ export default function Footer() {
 							Envíos y Devoluciones
 						</Link>
 					</div>
-					<div>
-						© {new Date().getFullYear()} Abraxas Joyería. Todos los derechos reservados.
+					<div className="flex flex-wrap items-center justify-between gap-3 text-left">
+						<span>
+							© {new Date().getFullYear()} Abraxas Joyería. Todos los derechos reservados.
+						</span>
+						<a
+							href="https://colonia.cloud"
+							target="_blank"
+							rel="noopener noreferrer"
+							className="shrink-0 opacity-80 transition-opacity hover:opacity-100"
+							aria-label="Colonia Cloud"
+						>
+							<Image src="/logo-cc.svg" alt="Colonia Cloud" width={111} height={24} className="h-6 w-auto invert" />
+						</a>
 					</div>
 				</div>
 			</div>
