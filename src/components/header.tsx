@@ -8,6 +8,7 @@ import { useCart } from "@/lib/cart-context";
 import { cn } from "@/lib/utils";
 import { ShoppingBag, User, Menu, X, ChevronDown, Search } from "lucide-react";
 import type { WPCategory } from "@/lib/types";
+import { useHideOnScroll } from "@/lib/hooks/use-hide-on-scroll";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -25,6 +26,7 @@ export default function Header({ categories = [] }: HeaderProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { totalItems } = useCart();
+  const promoBarVisible = useHideOnScroll();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileCatsOpen, setMobileCatsOpen] = useState(false);
   const [megaOpen, setMegaOpen] = useState(false);
@@ -55,7 +57,12 @@ export default function Header({ categories = [] }: HeaderProps) {
   }
 
   return (
-    <header className="fixed top-4 left-1/2 z-50 w-[calc(100%-2rem)] max-w-[1200px] -translate-x-1/2 rounded-2xl border border-[var(--color-line)] bg-[var(--color-panel)]/80 shadow-[0_8px_40px_rgba(0,0,0,0.5)] backdrop-blur-xl">
+    <header
+      className={cn(
+        "fixed left-1/2 z-50 w-[calc(100%-2rem)] max-w-[1200px] -translate-x-1/2 rounded-2xl border border-[var(--color-line)] bg-[var(--color-panel)]/80 shadow-[0_8px_40px_rgba(0,0,0,0.5)] backdrop-blur-xl transition-[top] duration-500 ease-out",
+        promoBarVisible ? "top-[52px]" : "top-4"
+      )}
+    >
       {/* Main nav */}
       <nav className="flex items-center justify-between px-5 py-3.5">
         {/* Left: logo */}

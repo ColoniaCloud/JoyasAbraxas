@@ -79,7 +79,7 @@ export default async function HomePage() {
   );
 
   return (
-    <main className="-mt-24">
+    <main className="-mt-36">
       <h1 className="sr-only">
         Abraxas Joyería — joyería artesanal de alta calidad en Uruguay
       </h1>

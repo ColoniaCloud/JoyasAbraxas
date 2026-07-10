@@ -6,11 +6,13 @@ import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { useCart } from "@/lib/cart-context";
 import { trackPurchase } from "@/lib/analytics";
+import { formatPrice } from "@/lib/utils";
 import { Suspense } from "react";
 
 function ResultadoContent() {
 	const searchParams = useSearchParams();
 	const status = searchParams.get("status");
+	const total = searchParams.get("total");
 	const { clearCart } = useCart();
 
 	// Limpiar carrito en success/pending (por si el redirect no lo hizo)
@@ -86,6 +88,12 @@ function ResultadoContent() {
 				</p>
 				<div className="rounded-xl border border-[var(--color-line)] bg-[var(--color-bg)] p-5 text-sm">
 					<dl className="grid gap-3">
+						{total && (
+							<div className="flex justify-between gap-4">
+								<dt className="font-semibold text-[var(--color-ink)]">Monto a transferir</dt>
+								<dd className="font-bold text-[var(--color-brand)]">{formatPrice(total)} <span className="font-normal text-xs text-[var(--color-muted)]">(10% off aplicado)</span></dd>
+							</div>
+						)}
 						<div className="flex justify-between gap-4">
 							<dt className="font-semibold text-[var(--color-ink)]">Banco</dt>
 							<dd className="text-[var(--color-muted)]">BROU</dd>

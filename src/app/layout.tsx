@@ -4,6 +4,8 @@ import { Geist, Cormorant_Garamond } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { CartProvider } from "@/lib/cart-context";
 import Header from "@/components/header";
+import PromoBar from "@/components/promo-bar";
+import PromoModal from "@/components/promo-modal";
 import Footer from "@/components/footer";
 import TrustBar from "@/components/trust-bar";
 import Analytics from "@/components/analytics";
@@ -68,8 +70,10 @@ export default async function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd()) }}
         />
         <CartProvider>
+          <PromoBar />
           <Header categories={categories} />
-          <div className="pt-24">
+          <PromoModal />
+          <div className="pt-36">
             {children}
           </div>
           <TrustBar />

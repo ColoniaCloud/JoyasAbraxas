@@ -16,6 +16,9 @@ interface OrderItem {
 
 // ── WooCommerce Orders ──
 
+/** Descuento por pago con transferencia bancaria (se aplica sobre el total que calcula WooCommerce, no sobre precios enviados por el cliente). */
+const BANK_TRANSFER_DISCOUNT_RATE = 0.1;
+
 export async function createWCOrder(
 	customer: CheckoutFormData,
 	items: OrderItem[],
@@ -76,6 +79,43 @@ export async function createWCOrder(
 		const error = await res.json().catch(() => ({}));
 		throw new Error(
 			error.message || `Error creando pedido: ${res.status}`,
+		);
+	}
+
+	const order = (await res.json()) as { id: number; total: string };
+
+	if (isBankTransfer) {
+		return applyBankTransferDiscount(order.id, parseFloat(order.total));
+	}
+
+	return order;
+}
+
+/** Agrega una línea de descuento (fee negativo) al pedido ya creado, sobre el subtotal real calculado por WooCommerce. */
+async function applyBankTransferDiscount(orderId: number, subtotal: number) {
+	const discount = Math.round(subtotal * BANK_TRANSFER_DISCOUNT_RATE * 100) / 100;
+
+	const url = new URL(`/wp-json/wc/v3/orders/${orderId}`, WP_URL);
+	url.searchParams.set("consumer_key", WC_KEY);
+	url.searchParams.set("consumer_secret", WC_SECRET);
+
+	const res = await fetch(url.toString(), {
+		method: "PUT",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({
+			fee_lines: [
+				{
+					name: "Descuento transferencia bancaria (10%)",
+					total: (-discount).toFixed(2),
+				},
+			],
+		}),
+	});
+
+	if (!res.ok) {
+		const error = await res.json().catch(() => ({}));
+		throw new Error(
+			error.message || `Error aplicando descuento al pedido ${orderId}: ${res.status}`,
 		);
 	}
 

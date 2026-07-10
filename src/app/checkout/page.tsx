@@ -6,6 +6,7 @@ import { formatPrice } from "@/lib/utils";
 import { trackBeginCheckout } from "@/lib/analytics";
 import type { CheckoutRequest, PaymentMethod } from "@/lib/types/checkout";
 import { Building2, CreditCard, LogIn, ShieldCheck, UserCheck } from "lucide-react";
+import PromoBanner from "@/components/promo-banner";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
@@ -175,7 +176,7 @@ export default function CheckoutPage() {
       }
       clearCart();
       if (data.method === "bank_transfer") {
-        router.push("/checkout/resultado?status=bank_transfer");
+        router.push(`/checkout/resultado?status=bank_transfer&total=${encodeURIComponent(data.total ?? "")}`);
       } else {
         router.push(`/checkout/resultado?status=${data.resultStatus ?? "pending"}`);
       }
@@ -189,6 +190,9 @@ export default function CheckoutPage() {
     if (!pendingPayload) return;
     await submitOrder({ ...pendingPayload, mpFormData });
   }
+
+  const bankDiscount = paymentMethod === "bank_transfer" ? totalPrice * 0.1 : 0;
+  const displayTotal = totalPrice - bankDiscount;
 
   const [loggedFirst, loggedLast] = loggedUser
     ? [loggedUser.name.split(" ")[0] ?? "", loggedUser.name.split(" ").slice(1).join(" ")]
@@ -254,6 +258,7 @@ export default function CheckoutPage() {
     <main className="mx-auto max-w-[960px] px-4 py-8">
       <Link href="/carrito" className="mb-4 inline-block font-semibold text-[var(--color-brand-strong)]">Volver al carrito</Link>
       <h1 className="mb-6">Checkout</h1>
+      <PromoBanner />
       <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
         <div className="flex flex-col gap-4">
           {!loggedUser && (
@@ -351,7 +356,7 @@ export default function CheckoutPage() {
                   </button>
                   <button type="button" onClick={() => setPaymentMethod("bank_transfer")} className={`flex items-center gap-3 rounded-xl border-2 p-4 text-left transition-colors ${paymentMethod === "bank_transfer" ? "border-[var(--color-brand)] bg-[var(--color-brand)]/5" : "border-[var(--color-line)] hover:border-[var(--color-brand)]/50"}`}>
                     <Building2 size={22} className="shrink-0 text-[var(--color-brand)]" />
-                    <div><p className="m-0 font-semibold text-sm">Transferencia Bancaria</p><p className="m-0 text-xs text-[var(--color-muted)]">BROU - Caja de ahorro en pesos</p></div>
+                    <div><p className="m-0 font-semibold text-sm">Transferencia Bancaria</p><p className="m-0 text-xs text-[var(--color-brand)]">BROU - Caja de ahorro en pesos · 10% de descuento</p></div>
                   </button>
                 </div>
               </section>
@@ -375,7 +380,10 @@ export default function CheckoutPage() {
             ))}
           </div>
           <div className="flex justify-between pt-3 text-sm text-[var(--color-muted)]"><span>Productos ({totalItems})</span><span>{formatPrice(totalPrice)}</span></div>
-          <div className="mt-2 flex justify-between text-lg font-bold"><span>Total</span><span>{formatPrice(totalPrice)}</span></div>
+          {bankDiscount > 0 && (
+            <div className="flex justify-between text-sm text-[var(--color-brand)]"><span>Descuento transferencia (10%)</span><span>-{formatPrice(bankDiscount)}</span></div>
+          )}
+          <div className="mt-2 flex justify-between text-lg font-bold"><span>Total</span><span>{formatPrice(displayTotal)}</span></div>
           <button type="submit" form="checkout-form" disabled={loading || (!loggedUser && accountMode === "idle") || accountMode === "login"} className="mt-4 w-full cursor-pointer rounded-[9px] border-0 bg-[var(--color-brand)] p-3 font-[inherit] font-bold text-[#f6fffb] transition-colors hover:bg-[var(--color-brand-strong)] disabled:cursor-not-allowed disabled:opacity-50">
             {loading ? "Procesando..." : paymentMethod === "mercadopago" ? "Continuar al pago" : "Confirmar pedido"}
           </button>

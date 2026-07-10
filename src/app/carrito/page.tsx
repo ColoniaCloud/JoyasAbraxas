@@ -5,6 +5,7 @@ import { unitPrice, customizationSummary } from "@/lib/cart";
 import { formatPrice } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
+import PromoBanner from "@/components/promo-banner";
 
 export default function CarritoPage() {
   const { items, removeItem, updateQuantity, totalItems, totalPrice, clearCart } = useCart();
@@ -15,6 +16,8 @@ export default function CarritoPage() {
         Seguir comprando
       </Link>
       <h1 className="mb-6">Carrito ({totalItems})</h1>
+
+      <PromoBanner />
 
       {items.length === 0 ? (
         <section className="rounded-2xl border border-[var(--color-line)] bg-[var(--color-panel)] p-8 text-center">

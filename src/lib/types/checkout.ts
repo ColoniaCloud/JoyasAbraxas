@@ -42,6 +42,8 @@ export interface CheckoutResponse {
 	orderId: number;
 	initPoint?: string;
 	method?: PaymentMethod;
+	/** Total final del pedido en WooCommerce (con descuento de transferencia ya aplicado, si corresponde) */
+	total?: string;
 }
 
 // ── MercadoPago ──

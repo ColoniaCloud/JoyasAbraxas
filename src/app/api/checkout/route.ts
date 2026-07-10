@@ -42,11 +42,12 @@ export async function POST(request: Request) {
 			paymentMethod,
 		);
 
-		// 2a. Transferencia bancaria: devolver directamente
+		// 2a. Transferencia bancaria: devolver directamente (order.total ya incluye el 10% de descuento)
 		if (paymentMethod === "bank_transfer") {
 			return NextResponse.json({
 				orderId: order.id,
 				method: "bank_transfer",
+				total: order.total,
 			});
 		}
 
