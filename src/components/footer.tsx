@@ -152,6 +152,13 @@ export default function Footer() {
 						>
 							Envíos y Devoluciones
 						</Link>
+						<span>·</span>
+						<Link
+							href="/garantia"
+							className="transition-colors hover:text-[var(--color-brand)]"
+						>
+							Garantías
+						</Link>
 					</div>
 					<div className="flex flex-wrap items-center justify-between gap-3 text-left">
 						<span>

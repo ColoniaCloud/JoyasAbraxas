@@ -202,6 +202,15 @@ h1, h2, h3, h4 {
 .delay-300 { animation-delay: 300ms; }
 .delay-450 { animation-delay: 450ms; }
 
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.animate-gradient-shift {
+  animation: gradient-shift 12s ease-in-out infinite;
+}
+
 @keyframes auto-scroll-left {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
