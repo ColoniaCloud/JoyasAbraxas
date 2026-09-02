@@ -7,6 +7,11 @@ const authEndpoint =
 const wcKey = process.env.WC_CONSUMER_KEY;
 const wcSecret = process.env.WC_CONSUMER_SECRET;
 
+// Mensaje único que ven los clientes cuando WordPress no responde correctamente.
+// El detalle técnico va siempre a console.error, nunca a la pantalla.
+const API_ERROR_MESSAGE =
+	'No pudimos cargar la información en este momento. Por favor, intentá de nuevo en unos minutos.';
+
 function ensureWpUrl() {
 	if (!wpBaseUrl) {
 		throw new Error('Falta NEXT_PUBLIC_WP_URL en el archivo .env');
@@ -20,20 +25,61 @@ function withWooAuth(url: URL) {
 	}
 }
 
-async function wcGet<T>(path: string, revalidate = 1800): Promise<T> {
+async function wpFetch(
+	path: string,
+	revalidate: number,
+	{ auth = true, tag = 'woocommerce' }: { auth?: boolean; tag?: string } = {},
+): Promise<Response> {
 	ensureWpUrl();
 
 	const url = new URL(path, wpBaseUrl);
-	withWooAuth(url);
+	if (auth) withWooAuth(url);
 
-	const response = await fetch(url.toString(), {
-		next: { revalidate, tags: ['woocommerce'] },
-	});
-	if (!response.ok) {
-		throw new Error(`Error ${response.status}: ${response.statusText}`);
+	let response: Response;
+	try {
+		response = await fetch(url.toString(), {
+			next: { revalidate, tags: [tag] },
+		});
+	} catch (error) {
+		console.error(`[wp] Fallo de red al pedir ${path}:`, error);
+		throw new Error(API_ERROR_MESSAGE);
 	}
 
-	return response.json() as Promise<T>;
+	if (!response.ok) {
+		console.error(`[wp] ${path} respondió ${response.status} ${response.statusText}`);
+		throw new Error(API_ERROR_MESSAGE);
+	}
+
+	return response;
+}
+
+// WordPress puede responder 200 con el cuerpo vacío (o con HTML) cuando PHP falla
+// o un plugin rompe la REST API. En ese caso response.json() lanza
+// «Unexpected end of JSON input», que antes llegaba tal cual al cliente.
+async function readJson<T>(response: Response, path: string): Promise<T> {
+	const body = await response.text();
+
+	if (!body.trim()) {
+		console.error(
+			`[wp] ${path} respondió ${response.status} con el cuerpo vacío: la REST API de WordPress no está devolviendo JSON.`,
+		);
+		throw new Error(API_ERROR_MESSAGE);
+	}
+
+	try {
+		return JSON.parse(body) as T;
+	} catch {
+		const contentType = response.headers.get('content-type') ?? 'desconocido';
+		console.error(
+			`[wp] ${path} respondió algo que no es JSON (content-type: ${contentType}): ${body.slice(0, 300)}`,
+		);
+		throw new Error(API_ERROR_MESSAGE);
+	}
+}
+
+async function wcGet<T>(path: string, revalidate = 1800): Promise<T> {
+	const response = await wpFetch(path, revalidate);
+	return readJson<T>(response, path);
 }
 
 export async function fetchProducts({ perPage = 12, category, onSale, page = 1, search }: { perPage?: number; category?: number; onSale?: boolean; page?: number; search?: string } = {}) {
@@ -42,18 +88,8 @@ export async function fetchProducts({ perPage = 12, category, onSale, page = 1, 
 	if (onSale) path += `&on_sale=true`;
 	if (search) path += `&search=${encodeURIComponent(search)}`;
 
-	ensureWpUrl();
-	const url = new URL(path, wpBaseUrl);
-	withWooAuth(url);
-
-	const response = await fetch(url.toString(), {
-		next: { revalidate: 1800, tags: ['woocommerce'] },
-	});
-	if (!response.ok) {
-		throw new Error(`Error ${response.status}: ${response.statusText}`);
-	}
-
-	const data = (await response.json()) as WPProduct[];
+	const response = await wpFetch(path, 1800);
+	const data = await readJson<WPProduct[]>(response, path);
 	const totalPages = parseInt(response.headers.get('x-wp-totalpages') ?? '1', 10);
 	const total = parseInt(response.headers.get('x-wp-total') ?? '0', 10);
 
@@ -91,23 +127,15 @@ export async function fetchCategoryBySlug(slug: string) {
 }
 
 export async function fetchPosts({ perPage = 12 } = {}) {
-	ensureWpUrl();
-	const url = new URL(`/wp-json/wp/v2/posts?per_page=${perPage}&_embed`, wpBaseUrl!);
-	const response = await fetch(url.toString(), {
-		next: { revalidate: 3600, tags: ['posts'] },
-	});
-	if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
-	return response.json() as Promise<WPPost[]>;
+	const path = `/wp-json/wp/v2/posts?per_page=${perPage}&_embed`;
+	const response = await wpFetch(path, 3600, { auth: false, tag: 'posts' });
+	return readJson<WPPost[]>(response, path);
 }
 
 export async function fetchPost(slug: string) {
-	ensureWpUrl();
-	const url = new URL(`/wp-json/wp/v2/posts?slug=${encodeURIComponent(slug)}&_embed`, wpBaseUrl!);
-	const response = await fetch(url.toString(), {
-		next: { revalidate: 3600, tags: ['posts'] },
-	});
-	if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
-	const posts = (await response.json()) as WPPost[];
+	const path = `/wp-json/wp/v2/posts?slug=${encodeURIComponent(slug)}&_embed`;
+	const response = await wpFetch(path, 3600, { auth: false, tag: 'posts' });
+	const posts = await readJson<WPPost[]>(response, path);
 	return posts[0] ?? null;
 }
 
