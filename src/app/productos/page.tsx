@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { fetchProducts } from "@/lib/wp";
+import { fetchProducts, WpApiError } from "@/lib/wp";
 import type { WPProduct } from "@/lib/types";
 import Link from "next/link";
 import ProductCard from "@/components/product-card";
@@ -32,6 +32,8 @@ export default async function ProductosPage({ searchParams }: Props) {
     products = result.data;
     totalPages = result.totalPages;
   } catch (error) {
+    // No renderizar el fallo: Next cachearía esta pantalla de error como render válido.
+    if (error instanceof WpApiError) throw error;
     errorMessage =
       error instanceof Error
         ? error.message

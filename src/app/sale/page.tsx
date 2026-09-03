@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { fetchProducts } from "@/lib/wp";
+import { fetchProducts, WpApiError } from "@/lib/wp";
 import type { WPProduct } from "@/lib/types";
 import ProductCard from "@/components/product-card";
 
@@ -22,6 +22,8 @@ export default async function SalePage() {
     const result = await fetchProducts({ perPage: 50, onSale: true });
     products = result.data;
   } catch (e) {
+    // No renderizar el fallo: Next cachearía esta pantalla de error como render válido.
+    if (e instanceof WpApiError) throw e;
     error = e instanceof Error ? e.message : "No se pudieron cargar los productos";
   }
 

@@ -1,4 +1,4 @@
-import { fetchPost } from "@/lib/wp";
+import { fetchPost, WpApiError } from "@/lib/wp";
 import { sanitize } from "@/lib/sanitize";
 import { blogPostJsonLd, breadcrumbJsonLd } from "@/lib/structured-data";
 import type { Metadata } from "next";
@@ -43,6 +43,8 @@ export default async function BlogPostPage({ params }: Props) {
   try {
     post = await fetchPost(slug);
   } catch (e) {
+    // No renderizar el fallo: Next cachearía esta pantalla de error como render válido.
+    if (e instanceof WpApiError) throw e;
     error = e instanceof Error ? e.message : "No se pudo cargar el artículo";
   }
 

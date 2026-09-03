@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { fetchProducts, fetchCategories } from "@/lib/wp";
+import { fetchProducts, fetchCategories, WpApiError } from "@/lib/wp";
 import type { WPProduct, WPCategory } from "@/lib/types";
 import HeroSlider, { type HeroSlide } from "@/components/hero-slider";
 import CategorySection from "@/components/category-section";
@@ -65,8 +65,11 @@ export default async function HomePage() {
     categories = categories.filter(
       (c) => c.parent === 0 && c.slug !== "uncategorized" && c.count > 0
     );
-  } catch {
-    // API no disponible — slides usan href de fallback
+  } catch (e) {
+    // Relanzamos: es preferible servir la última home buena en caché que cachear
+    // una home vacía mientras la API está caída.
+    if (e instanceof WpApiError) throw e;
+    // Otro fallo — los slides usan href de fallback
   }
 
   const slides = buildSlides(categories);
@@ -74,7 +77,12 @@ export default async function HomePage() {
   // Fetch products for each category in parallel
   const categoryProducts = await Promise.all(
     categories.map((cat) =>
-      fetchProducts({ perPage: 12, category: cat.id }).then(r => r.data).catch(() => [] as WPProduct[])
+      fetchProducts({ perPage: 12, category: cat.id })
+        .then((r) => r.data)
+        .catch((e) => {
+          if (e instanceof WpApiError) throw e;
+          return [] as WPProduct[];
+        })
     )
   );
 

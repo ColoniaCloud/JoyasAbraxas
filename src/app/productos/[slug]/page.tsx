@@ -1,4 +1,4 @@
-import { fetchProductBySlug, fetchProductReviews, fetchAttributeTerms, fetchProductVariations, fetchProducts } from "@/lib/wp";
+import { fetchProductBySlug, fetchProductReviews, fetchAttributeTerms, fetchProductVariations, fetchProducts, WpApiError } from "@/lib/wp";
 import { sanitize } from "@/lib/sanitize";
 import { formatPrice } from "@/lib/utils";
 import { productJsonLd, breadcrumbJsonLd } from "@/lib/structured-data";
@@ -48,6 +48,8 @@ export default async function ProductoDetailPage({ params }: Props) {
     product = await fetchProductBySlug(slug);
     reviews = await fetchProductReviews(product.id);
   } catch (e) {
+    // No renderizar el fallo: Next cachearía esta pantalla de error como render válido.
+    if (e instanceof WpApiError) throw e;
     error = e instanceof Error ? e.message : "No se pudo cargar el producto";
   }
 

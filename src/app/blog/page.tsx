@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { fetchPosts } from "@/lib/wp";
+import { fetchPosts, WpApiError } from "@/lib/wp";
 import type { WPPost } from "@/lib/types";
 import Link from "next/link";
 import Image from "next/image";
@@ -18,6 +18,8 @@ export default async function BlogPage() {
   try {
     posts = await fetchPosts({ perPage: 12 });
   } catch (e) {
+    // No renderizar el fallo: Next cachearía esta pantalla de error como render válido.
+    if (e instanceof WpApiError) throw e;
     error = e instanceof Error ? e.message : "No se pudieron cargar los posts";
   }
 

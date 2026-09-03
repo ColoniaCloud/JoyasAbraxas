@@ -1,4 +1,4 @@
-import { fetchCategoryBySlug, fetchProducts } from "@/lib/wp";
+import { fetchCategoryBySlug, fetchProducts, WpApiError } from "@/lib/wp";
 import { breadcrumbJsonLd } from "@/lib/structured-data";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -44,6 +44,8 @@ export default async function CategoriaDetailPage({ params }: Props) {
     const result = await fetchProducts({ perPage: 50, category: category.id });
     products = result.data;
   } catch (e) {
+    // No renderizar el fallo: Next cachearía esta pantalla de error como render válido.
+    if (e instanceof WpApiError) throw e;
     error = e instanceof Error ? e.message : "No se pudo cargar la categoría";
   }
 

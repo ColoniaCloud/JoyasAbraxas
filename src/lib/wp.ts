@@ -12,6 +12,11 @@ const wcSecret = process.env.WC_CONSUMER_SECRET;
 const API_ERROR_MESSAGE =
 	'No pudimos cargar la información en este momento. Por favor, intentá de nuevo en unos minutos.';
 
+// Fallo de infraestructura (WordPress caído, red, respuesta inválida), distinto de un
+// 404 legítimo como «Producto no encontrado». Las páginas lo relanzan para que Next
+// no cachee una pantalla de error como si fuera un render válido.
+export class WpApiError extends Error {}
+
 function ensureWpUrl() {
 	if (!wpBaseUrl) {
 		throw new Error('Falta NEXT_PUBLIC_WP_URL en el archivo .env');
@@ -42,12 +47,12 @@ async function wpFetch(
 		});
 	} catch (error) {
 		console.error(`[wp] Fallo de red al pedir ${path}:`, error);
-		throw new Error(API_ERROR_MESSAGE);
+		throw new WpApiError(API_ERROR_MESSAGE);
 	}
 
 	if (!response.ok) {
 		console.error(`[wp] ${path} respondió ${response.status} ${response.statusText}`);
-		throw new Error(API_ERROR_MESSAGE);
+		throw new WpApiError(API_ERROR_MESSAGE);
 	}
 
 	return response;
@@ -63,7 +68,7 @@ async function readJson<T>(response: Response, path: string): Promise<T> {
 		console.error(
 			`[wp] ${path} respondió ${response.status} con el cuerpo vacío: la REST API de WordPress no está devolviendo JSON.`,
 		);
-		throw new Error(API_ERROR_MESSAGE);
+		throw new WpApiError(API_ERROR_MESSAGE);
 	}
 
 	try {
@@ -73,7 +78,7 @@ async function readJson<T>(response: Response, path: string): Promise<T> {
 		console.error(
 			`[wp] ${path} respondió algo que no es JSON (content-type: ${contentType}): ${body.slice(0, 300)}`,
 		);
-		throw new Error(API_ERROR_MESSAGE);
+		throw new WpApiError(API_ERROR_MESSAGE);
 	}
 }
 

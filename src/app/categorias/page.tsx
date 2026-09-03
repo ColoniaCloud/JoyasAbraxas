@@ -1,5 +1,5 @@
 ﻿import type { Metadata } from "next";
-import { fetchCategories } from "@/lib/wp";
+import { fetchCategories, WpApiError } from "@/lib/wp";
 import type { WPCategory } from "@/lib/types";
 import Link from "next/link";
 import Image from "next/image";
@@ -34,6 +34,8 @@ export default async function CategoriasPage() {
         !norm(c.slug).startsWith("acces"),
     );
   } catch (e) {
+    // No renderizar el fallo: Next cachearía esta pantalla de error como render válido.
+    if (e instanceof WpApiError) throw e;
     error = e instanceof Error ? e.message : "No se pudieron cargar las categorías";
   }
 
