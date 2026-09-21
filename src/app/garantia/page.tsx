@@ -205,10 +205,10 @@ export default function GarantiaPage() {
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3">
             <a
-              href="mailto:contacato@joyasabraxas.com"
+              href="mailto:contacto@joyasabraxas.com"
               className="inline-flex items-center justify-center rounded-full bg-[var(--color-brand)] px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-brand-strong)]"
             >
-              contacato@joyasabraxas.com
+              contacto@joyasabraxas.com
             </a>
             <a
               href="tel:+59898842100"
