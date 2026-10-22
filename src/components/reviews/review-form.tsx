@@ -174,7 +174,7 @@ export default function ReviewForm({ productId, productName }: { productId: numb
 
 			<div className="grid gap-3 sm:grid-cols-2">
 				<label className="flex flex-col gap-1 text-sm font-medium">
-					Nombre
+					Nombre <span className="font-normal text-[var(--color-muted)]">(visible al público)</span>
 					<input
 						type="text"
 						required
