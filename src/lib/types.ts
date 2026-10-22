@@ -112,6 +112,15 @@ export interface WPCategory {
 	parent: number;
 }
 
+/** Foto adjunta a una reseña (la expone el plugin Abraxas Reviews). */
+export interface WPReviewPhoto {
+	id: number;
+	url: string;
+	thumb: string;
+	width: number;
+	height: number;
+}
+
 export interface WPReview {
 	id: number;
 	reviewer: string;
@@ -119,6 +128,8 @@ export interface WPReview {
 	rating: number;
 	date_created: string;
 	product_id: number;
+	verified?: boolean;
+	photos?: WPReviewPhoto[];
 }
 
 export interface WPPost {

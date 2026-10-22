@@ -1,4 +1,5 @@
 import type { WPProduct, WPPost } from "./types";
+import { summarizeReviews, type Review } from "./reviews";
 
 const SITE_NAME = "Abraxas Joyería";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.joyasabraxas.com";
@@ -31,7 +32,13 @@ export function organizationJsonLd() {
 	};
 }
 
-export function productJsonLd(product: WPProduct) {
+/**
+ * `reviews` son las reseñas aprobadas reales. El aggregateRating sale de ellas y no
+ * de `product.rating_count`: ese contador es una caché de WooCommerce que puede
+ * quedar desactualizada (valoraciones sin reseña detrás), y Google lo penaliza.
+ */
+export function productJsonLd(product: WPProduct, reviews: Review[] = []) {
+	const summary = summarizeReviews(reviews);
 	const offers: Record<string, unknown> = {
 		"@type": "Offer",
 		priceCurrency: "UYU",
@@ -77,12 +84,21 @@ export function productJsonLd(product: WPProduct) {
 			name: "Abraxas",
 		},
 		offers,
-		...(product.rating_count > 0 && {
+		...(summary.count > 0 && {
 			aggregateRating: {
 				"@type": "AggregateRating",
-				ratingValue: product.average_rating,
-				reviewCount: product.rating_count,
+				ratingValue: summary.average.toFixed(1),
+				reviewCount: summary.count,
+				bestRating: 5,
+				worstRating: 1,
 			},
+			review: reviews.slice(0, 10).map((r) => ({
+				"@type": "Review",
+				author: { "@type": "Person", name: r.author },
+				datePublished: r.date,
+				reviewBody: r.text,
+				reviewRating: { "@type": "Rating", ratingValue: r.rating, bestRating: 5, worstRating: 1 },
+			})),
 		}),
 	};
 }

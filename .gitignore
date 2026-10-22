@@ -34,3 +34,6 @@ sesion-*.md
 
 # Markdown docs (no versionar)
 *.md
+
+# Datos privados (emails de clientes, backups). Nunca versionar
+datos-privados/

@@ -2,6 +2,7 @@ import { fetchProductBySlug, fetchProductReviews, fetchAttributeTerms, fetchProd
 import { sanitize } from "@/lib/sanitize";
 import { formatPrice } from "@/lib/utils";
 import { productJsonLd, breadcrumbJsonLd } from "@/lib/structured-data";
+import { summarizeReviews, toReview, type Review } from "@/lib/reviews";
 import type { Metadata } from "next";
 import type { WCAttributeTerm, WPVariation, WPProduct } from "@/lib/types";
 import Link from "next/link";
@@ -9,6 +10,8 @@ import Breadcrumbs from "@/components/breadcrumbs";
 import ProductGallery from "@/components/product-gallery";
 import ProductPurchasePanel from "@/components/product-purchase-panel";
 import ProductCard from "@/components/product-card";
+import ReviewsSection from "@/components/reviews/reviews-section";
+import StarRating from "@/components/reviews/star-rating";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -41,12 +44,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ProductoDetailPage({ params }: Props) {
   const { slug } = await params;
   let product;
-  let reviews;
+  let reviews: Review[] = [];
   let error = "";
 
   try {
     product = await fetchProductBySlug(slug);
-    reviews = await fetchProductReviews(product.id);
+    reviews = (await fetchProductReviews(product.id)).map(toReview);
   } catch (e) {
     // No renderizar el fallo: Next cachearía esta pantalla de error como render válido.
     if (e instanceof WpApiError) throw e;
@@ -67,6 +70,7 @@ export default async function ProductoDetailPage({ params }: Props) {
   }
 
   const isVariable = product.type === "variable";
+  const reviewSummary = summarizeReviews(reviews);
 
   // Atributos de variación (los que el cliente elige) vs. atributos descriptivos
   const variationAttrs = product.attributes.filter((a) => a.variation);
@@ -110,7 +114,7 @@ export default async function ProductoDetailPage({ params }: Props) {
     <main className="mx-auto max-w-[1080px] px-4 pt-8 pb-28 lg:pb-8">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd(product)) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd(product, reviews)) }}
       />
       <script
         type="application/ld+json"
@@ -139,6 +143,19 @@ export default async function ProductoDetailPage({ params }: Props) {
         {/* Info */}
         <div>
           <h1 className="mt-0 mb-2 text-2xl">{product.name}</h1>
+
+          {reviewSummary.count > 0 && (
+            <a
+              href="#resenas"
+              className="mb-3 inline-flex items-center gap-2 text-sm text-[var(--color-muted)] hover:text-[var(--color-ink)]"
+            >
+              <StarRating value={reviewSummary.average} size={16} />
+              <span>
+                {reviewSummary.average.toFixed(1).replace(".", ",")} · {reviewSummary.count}{" "}
+                {reviewSummary.count === 1 ? "reseña" : "reseñas"}
+              </span>
+            </a>
+          )}
 
           {product.categories.length > 0 && (
             <div className="mb-3 flex flex-wrap gap-1.5">
@@ -215,33 +232,9 @@ export default async function ProductoDetailPage({ params }: Props) {
         </section>
       )}
 
-      {/* Reviews */}
-      {reviews && reviews.length > 0 && (
-        <section className="mt-8">
-          <h2 className="mb-4">
-            Reseñas ({reviews.length})
-          </h2>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {reviews.map((review) => (
-              <article
-                key={review.id}
-                className="rounded-[14px] border border-[var(--color-line)] bg-[var(--color-panel)] p-4"
-              >
-                <div className="mb-1 flex items-center justify-between">
-                  <span className="font-semibold">{review.reviewer}</span>
-                  <span className="text-sm text-[var(--color-muted)]">
-                    {"★".repeat(Math.max(0, Math.min(5, review.rating)))}{"☆".repeat(Math.max(0, 5 - Math.max(0, Math.min(5, review.rating))))}
-                  </span>
-                </div>
-                <div
-                  className="text-sm text-[var(--color-muted)] [&_p]:m-0"
-                  dangerouslySetInnerHTML={{ __html: review.review }}
-                />
-              </article>
-            ))}
-          </div>
-        </section>
-      )}
+      {/* Reseñas */}
+      <ReviewsSection productId={product.id} productName={product.name} reviews={reviews} />
+
 
       {/* Productos relacionados */}
       {related.length > 0 && (

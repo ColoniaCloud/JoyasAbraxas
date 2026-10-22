@@ -114,7 +114,9 @@ export async function fetchProductBySlug(slug: string) {
 }
 
 export async function fetchProductReviews(productId: number) {
-	return wcGet<WPReview[]>(`/wp-json/wc/v3/products/reviews?product=${productId}`, 1800);
+	const path = `/wp-json/wc/v3/products/reviews?product=${productId}&status=approved&per_page=100&orderby=date_gmt&order=desc`;
+	const response = await wpFetch(path, 900, { tag: 'reviews' });
+	return readJson<WPReview[]>(response, path);
 }
 
 export async function fetchCategories({ perPage = 100 } = {}) {

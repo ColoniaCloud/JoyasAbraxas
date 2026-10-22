@@ -3,6 +3,7 @@ import { fetchProducts, fetchCategories, WpApiError } from "@/lib/wp";
 import type { WPProduct, WPCategory } from "@/lib/types";
 import HeroSlider, { type HeroSlide } from "@/components/hero-slider";
 import CategorySection from "@/components/category-section";
+import Testimonials from "@/components/testimonials";
 
 export const metadata: Metadata = {
   title: "Abraxas Joyería | Joyería artesanal de alta calidad en Uruguay",
@@ -100,6 +101,8 @@ export default async function HomePage() {
           <CategorySection key={cat.id} cat={cat} products={products} index={i} />
         );
       })}
+
+      <Testimonials />
     </main>
   );
 }
