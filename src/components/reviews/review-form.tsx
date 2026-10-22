@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
 import { compressImage } from "@/lib/image-compress";
 import { REVIEW_LIMITS, REVIEW_PHOTO_TYPES } from "@/lib/reviews";
 
@@ -16,8 +16,17 @@ const FIELD =
 const STAR_PATH =
 	"M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z";
 
-export default function ReviewForm({ productId, productName }: { productId: number; productName: string }) {
-	const [open, setOpen] = useState(false);
+interface ReviewFormProps {
+	productId: number;
+	productName: string;
+	/** En la página dedicada el formulario arranca abierto y no tiene «Cancelar». */
+	standalone?: boolean;
+	/** Se muestra debajo del mensaje de agradecimiento (p. ej. «Reseñar otro producto»). */
+	successAction?: ReactNode;
+}
+
+export default function ReviewForm({ productId, productName, standalone = false, successAction }: ReviewFormProps) {
+	const [open, setOpen] = useState(standalone);
 	const [rating, setRating] = useState(0);
 	const [hover, setHover] = useState(0);
 	const [name, setName] = useState("");
@@ -35,6 +44,11 @@ export default function ReviewForm({ productId, productName }: { productId: numb
 		const urls = previews.current;
 		return () => urls.forEach((url) => URL.revokeObjectURL(url));
 	}, []);
+
+	// En modo página el formulario ya está abierto: el reloj anti-bots corre desde el montaje.
+	useEffect(() => {
+		if (standalone) startedAt.current = Date.now();
+	}, [standalone]);
 
 	function openForm() {
 		startedAt.current = Date.now();
@@ -119,6 +133,7 @@ export default function ReviewForm({ productId, productName }: { productId: numb
 				<p className="m-0 mt-1 text-sm text-[var(--color-muted)]">
 					La vamos a revisar y la publicamos en cuanto esté aprobada.
 				</p>
+				{successAction && <div className="mt-4">{successAction}</div>}
 			</div>
 		);
 	}
@@ -281,13 +296,15 @@ export default function ReviewForm({ productId, productName }: { productId: numb
 				>
 					{status === "sending" ? "Enviando..." : "Enviar reseña"}
 				</button>
-				<button
-					type="button"
-					onClick={() => setOpen(false)}
-					className="cursor-pointer rounded-lg border border-[var(--color-line)] px-4 py-2.5 text-sm font-semibold"
-				>
-					Cancelar
-				</button>
+				{!standalone && (
+					<button
+						type="button"
+						onClick={() => setOpen(false)}
+						className="cursor-pointer rounded-lg border border-[var(--color-line)] px-4 py-2.5 text-sm font-semibold"
+					>
+						Cancelar
+					</button>
+				)}
 			</div>
 		</form>
 	);

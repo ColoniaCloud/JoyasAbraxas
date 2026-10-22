@@ -30,6 +30,7 @@ const LINKS = [
 	{ href: "/blog", label: "Blog" },
 	{ href: "/nosotros", label: "Nosotros" },
 	{ href: "/contacto", label: "Contacto" },
+	{ href: "/dejar-resena", label: "Dejar una reseña" },
 ];
 
 export default function Footer() {
