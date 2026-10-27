@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import { MotionConfig } from "motion/react";
+import { Lens } from "@/components/ui/lens";
 import type { WPImage } from "@/lib/types";
 
 interface ProductGalleryProps {
@@ -11,6 +13,13 @@ interface ProductGalleryProps {
 
 export default function ProductGallery({ images, productName }: ProductGalleryProps) {
 	const [selectedIndex, setSelectedIndex] = useState(0);
+	const [hovering, setHovering] = useState(false);
+
+	// En pantallas táctiles el "hover" emulado dejaría la lupa pegada tras un toque.
+	const handleHovering = (value: boolean) => {
+		if (value && !window.matchMedia("(hover: hover)").matches) return;
+		setHovering(value);
+	};
 
 	if (!images.length) {
 		return (
@@ -24,15 +33,22 @@ export default function ProductGallery({ images, productName }: ProductGalleryPr
 
 	return (
 		<div className="flex flex-col gap-3">
-			<div className="relative aspect-square overflow-hidden rounded-2xl bg-[#1c1a18]">
-				<Image
-					src={mainImage.src}
-					alt={mainImage.alt || productName}
-					fill
-					className="object-cover transition-opacity duration-300"
-					priority
-					sizes="(max-width: 768px) 100vw, 50vw"
-				/>
+			<div className="overflow-hidden rounded-2xl bg-[#1c1a18]">
+				<MotionConfig reducedMotion="user">
+					<Lens zoomFactor={2} hovering={hovering} setHovering={handleHovering}>
+						{/* Lens renderiza los hijos dos veces (base + copia ampliada): el hijo debe ser autocontenido */}
+						<div className="relative aspect-square">
+							<Image
+								src={mainImage.src}
+								alt={mainImage.alt || productName}
+								fill
+								className="object-cover"
+								priority
+								sizes="(max-width: 768px) 100vw, 50vw"
+							/>
+						</div>
+					</Lens>
+				</MotionConfig>
 			</div>
 
 			{images.length > 1 && (
