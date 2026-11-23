@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { ShoppingBag, User, Menu, X, ChevronDown, Search } from "lucide-react";
 import type { WPCategory } from "@/lib/types";
 import { useHideOnScroll } from "@/lib/hooks/use-hide-on-scroll";
+import GuirnaldaFiestas from "@/components/guirnalda-fiestas";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -21,9 +22,11 @@ const NAV_LINKS = [
 
 interface HeaderProps {
   categories?: WPCategory[];
+  /** Decoración de Fiestas (la decide el layout según la fecha) */
+  festive?: boolean;
 }
 
-export default function Header({ categories = [] }: HeaderProps) {
+export default function Header({ categories = [], festive = false }: HeaderProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { totalItems } = useCart();
@@ -333,6 +336,7 @@ export default function Header({ categories = [] }: HeaderProps) {
           )}
         </ul>
       </div>
+      {festive && <GuirnaldaFiestas hidden={megaOpen || mobileOpen || searchOpen} />}
     </header>
   );
 }

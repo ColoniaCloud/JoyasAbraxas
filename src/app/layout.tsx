@@ -12,6 +12,7 @@ import Analytics from "@/components/analytics";
 import { fetchCategories } from "@/lib/wp";
 import type { WPCategory } from "@/lib/types";
 import { organizationJsonLd } from "@/lib/structured-data";
+import { isSeasonActive } from "@/lib/season";
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.joyasabraxas.com";
@@ -71,7 +72,7 @@ export default async function RootLayout({
         />
         <CartProvider>
           <PromoBar />
-          <Header categories={categories} />
+          <Header categories={categories} festive={isSeasonActive()} />
           <PromoModal />
           <div className="pt-36">
             {children}
