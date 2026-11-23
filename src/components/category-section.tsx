@@ -5,14 +5,17 @@ import Image from "next/image";
 import Link from "next/link";
 import type { WPCategory, WPProduct } from "@/lib/types";
 import CategoryCarousel from "@/components/category-carousel";
+import EstrellasParallax from "@/components/estrellas-parallax";
 
 interface Props {
   cat: WPCategory;
   products: WPProduct[];
   index: number;
+  /** Decoración de Fiestas */
+  festive?: boolean;
 }
 
-export default function CategorySection({ cat, products, index }: Props) {
+export default function CategorySection({ cat, products, index, festive = false }: Props) {
   const ref = useRef<HTMLElement>(null);
   const [visible, setVisible] = useState(false);
   const isEven = index % 2 === 0;
@@ -34,7 +37,7 @@ export default function CategorySection({ cat, products, index }: Props) {
   }, []);
 
   return (
-    <section ref={ref} className="relative w-full overflow-hidden py-14">
+    <section ref={ref} className="relative w-full overflow-clip py-14">
       {/* Background image — full bleed */}
       {cat.image ? (
         <Image
@@ -58,6 +61,10 @@ export default function CategorySection({ cat, products, index }: Props) {
       />
       {/* Bottom gradient — makes carousel cards legible */}
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/25 to-black/80" />
+
+      {festive && (
+        <EstrellasParallax lado={isEven ? "derecha" : "izquierda"} seed={`cat-${cat.id}`} />
+      )}
 
       {/* Content — constrained to global max-width */}
       <div className="relative z-10 mx-auto max-w-[1200px] px-6">

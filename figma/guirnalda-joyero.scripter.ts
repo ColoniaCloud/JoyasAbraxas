@@ -169,6 +169,21 @@ function guirnaldaJoyeroSvg(o: GuirnaldaOpts): string {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${o.ancho} ${o.alto}" width="${o.ancho}" height="${o.alto}">${defs}${hileras}${estrellas}${broches}</svg>`;
 }
 
+/** Una estrella facetada suelta (la misma de la guirnalda), para usar flotando o como sello en redes */
+function estrellaSueltaSvg(id: string): string {
+  const R = 20;
+  return (
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-40 -40 80 80" width="80" height="80">` +
+    `<defs>` +
+    `<linearGradient id="${id}-cara" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6e7c1"/><stop offset=".35" stop-color="#dcc08a"/><stop offset=".7" stop-color="#b38f55"/><stop offset="1" stop-color="#8a6a3a"/></linearGradient>` +
+    `<linearGradient id="${id}-sombra" x1="1" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c9a76a"/><stop offset=".5" stop-color="#9a7745"/><stop offset="1" stop-color="#6e5130"/></linearGradient>` +
+    `<radialGradient id="${id}-halo"><stop offset="0" stop-color="#f3dfb3" stop-opacity=".3"/><stop offset="1" stop-color="#f3dfb3" stop-opacity="0"/></radialGradient>` +
+    `</defs>` +
+    estrella(0, 0, R, id, "") +
+    `</svg>`
+  );
+}
+
 /** Variantes listas para usar (web escritorio, web celular y piezas de redes) */
 const VARIANTES_JOYERO: Record<"escritorio" | "celular" | "post" | "historia", GuirnaldaOpts> = {
   escritorio: {

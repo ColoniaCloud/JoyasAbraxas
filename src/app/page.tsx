@@ -4,6 +4,7 @@ import type { WPProduct, WPCategory } from "@/lib/types";
 import HeroSlider, { type HeroSlide } from "@/components/hero-slider";
 import CategorySection from "@/components/category-section";
 import Testimonials from "@/components/testimonials";
+import { isSeasonActive } from "@/lib/season";
 
 export const metadata: Metadata = {
   title: "Abraxas Joyería | Joyería artesanal de alta calidad en Uruguay",
@@ -74,6 +75,7 @@ export default async function HomePage() {
   }
 
   const slides = buildSlides(categories);
+  const festive = isSeasonActive();
 
   // Fetch products for each category in parallel
   const categoryProducts = await Promise.all(
@@ -92,13 +94,13 @@ export default async function HomePage() {
       <h1 className="sr-only">
         Abraxas Joyería — joyería artesanal de alta calidad en Uruguay
       </h1>
-      <HeroSlider slides={slides} />
+      <HeroSlider slides={slides} festive={festive} />
 
       {categories.map((cat, i) => {
         const products = categoryProducts[i] ?? [];
         if (!products.length) return null;
         return (
-          <CategorySection key={cat.id} cat={cat} products={products} index={i} />
+          <CategorySection key={cat.id} cat={cat} products={products} index={i} festive={festive} />
         );
       })}
 

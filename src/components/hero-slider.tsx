@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import EstrellasParallax from "@/components/estrellas-parallax";
 
 export interface HeroSlide {
   image: string;
@@ -16,9 +17,11 @@ export interface HeroSlide {
 
 interface HeroSliderProps {
   slides: HeroSlide[];
+  /** Decoración de Fiestas */
+  festive?: boolean;
 }
 
-export default function HeroSlider({ slides }: HeroSliderProps) {
+export default function HeroSlider({ slides, festive = false }: HeroSliderProps) {
   const [current, setCurrent] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
 
@@ -62,7 +65,7 @@ export default function HeroSlider({ slides }: HeroSliderProps) {
 
   return (
     <section
-      className="relative h-[70vh] min-h-[480px] w-full touch-pan-y overflow-hidden bg-black md:h-[60vh] md:min-h-[400px]"
+      className="relative h-[70vh] min-h-[480px] w-full touch-pan-y overflow-clip bg-black md:h-[60vh] md:min-h-[400px]"
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >
@@ -89,6 +92,8 @@ export default function HeroSlider({ slides }: HeroSliderProps) {
           <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/35 to-black/15" />
         </div>
       ))}
+
+      {festive && <EstrellasParallax lado="hero" seed="hero" />}
 
       {/* Content — key={current} fuerza remount y reanima en cada cambio */}
       <div className="relative z-10 flex h-full items-end pb-16 md:pb-20">

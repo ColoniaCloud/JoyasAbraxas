@@ -241,3 +241,24 @@ h1, h2, h3, h4 {
     animation: none;
   }
 }
+
+/* Fiestas: estrellas flotantes con parallax (solo las mueve el scroll) */
+@keyframes ep-parallax {
+  from { transform: translateY(var(--ep-dist, 40px)); }
+  to { transform: translateY(calc(var(--ep-dist, 40px) * -1)); }
+}
+
+@supports (animation-timeline: view()) {
+  .ep-estrella {
+    animation: ep-parallax linear both;
+    animation-timeline: view();
+    animation-range: cover;
+    will-change: transform;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ep-estrella {
+    animation: none !important;
+  }
+}
