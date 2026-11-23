@@ -222,17 +222,17 @@ h1, h2, h3, h4 {
 }
 /* Fiestas: las estrellas de la guirnalda se balancean apenas */
 @keyframes gj-balanceo {
-  0%, 100% { transform: rotate(-2.5deg); }
-  50% { transform: rotate(2.5deg); }
+  0%, 100% { transform: rotate(-3deg); }
+  50% { transform: rotate(3deg); }
 }
 
 .gj-estrella {
   transform-box: view-box;
-  animation: gj-balanceo 5s ease-in-out infinite;
+  animation: gj-balanceo 3.6s ease-in-out infinite;
 }
 
 .gj-estrella:nth-of-type(2n) {
-  animation-duration: 6.5s;
+  animation-duration: 4.6s;
   animation-delay: -2s;
 }
 

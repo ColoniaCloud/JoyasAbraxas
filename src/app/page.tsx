@@ -4,6 +4,7 @@ import type { WPProduct, WPCategory } from "@/lib/types";
 import HeroSlider, { type HeroSlide } from "@/components/hero-slider";
 import CategorySection from "@/components/category-section";
 import Testimonials from "@/components/testimonials";
+import GuirnaldaSeparador from "@/components/guirnalda-separador";
 import { isSeasonActive } from "@/lib/season";
 
 export const metadata: Metadata = {
@@ -104,6 +105,7 @@ export default async function HomePage() {
         );
       })}
 
+      {festive && <GuirnaldaSeparador />}
       <Testimonials />
     </main>
   );
