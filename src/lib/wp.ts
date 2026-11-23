@@ -62,7 +62,14 @@ async function wpFetch(
 // o un plugin rompe la REST API. En ese caso response.json() lanza
 // «Unexpected end of JSON input», que antes llegaba tal cual al cliente.
 async function readJson<T>(response: Response, path: string): Promise<T> {
-	const body = await response.text();
+	let body: string;
+	try {
+		body = await response.text();
+	} catch (error) {
+		// La conexión se cortó a mitad de la respuesta (p. ej. NGHTTP2_INTERNAL_ERROR)
+		console.error(`[wp] ${path}: se cortó la conexión al leer la respuesta`, error);
+		throw new WpApiError(API_ERROR_MESSAGE);
+	}
 
 	if (!body.trim()) {
 		console.error(
@@ -104,8 +111,13 @@ export async function fetchProducts({ perPage = 12, category, onSale, page = 1, 
 /** Productos por id, en el mismo orden pedido (omite los que no estén publicados). */
 export async function fetchProductsByIds(ids: number[]) {
 	const path = `/wp-json/wc/v3/products?include=${ids.join(',')}&per_page=${ids.length}&status=publish`;
-	const response = await wpFetch(path, 1800);
-	const data = await readJson<WPProduct[]>(response, path);
+	let data: WPProduct[];
+	try {
+		data = await readJson<WPProduct[]>(await wpFetch(path, 1800), path);
+	} catch {
+		// Un reintento: los cortes de la API suelen ser momentáneos
+		data = await readJson<WPProduct[]>(await wpFetch(path, 1800), path);
+	}
 	return ids.flatMap((id) => data.filter((p) => p.id === id));
 }
 
