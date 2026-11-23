@@ -13,6 +13,10 @@ export interface HeroSlide {
   tagline: string;
   href: string;
   buttonLabel?: string;
+  /** Slide de campaña: botón champagne y foco de la imagen a la derecha */
+  variant?: "fiestas";
+  /** Recorte de la foto (object-position) */
+  focus?: string;
 }
 
 interface HeroSliderProps {
@@ -86,23 +90,34 @@ export default function HeroSlider({ slides, festive = false }: HeroSliderProps)
               "object-cover",
               i === current && "animate-scale-in"
             )}
+            style={slide.focus ? { objectPosition: slide.focus } : undefined}
             priority={i === 0}
             sizes="100vw"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/35 to-black/15" />
+          {slide.variant === "fiestas" && (
+            // Velo a la izquierda para que el título no compita con las joyas de la foto
+            <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent md:via-black/25" />
+          )}
         </div>
       ))}
 
       {festive && <EstrellasParallax lado="hero" seed="hero" />}
 
       {/* Content — key={current} fuerza remount y reanima en cada cambio */}
-      <div className="relative z-10 flex h-full items-end pb-16 md:pb-20">
+      <div className="relative z-10 flex h-full items-end pb-24 md:pb-20">
         <div className="mx-auto w-full max-w-[1200px] px-6">
           <div key={current} className="max-w-[580px]">
             <p className="animate-fade-in delay-100 mb-3 text-[11px] font-medium uppercase tracking-[0.25em] text-white/55">
               Joyería Abraxas
             </p>
-            <h2 className="animate-fade-in-up delay-200 mb-4 text-[clamp(2rem,4.5vw,3.8rem)] font-light leading-[1.08] tracking-tight text-white">
+            <h2
+              className={cn(
+                "animate-fade-in-up delay-200 mb-4 text-[clamp(2rem,4.5vw,3.8rem)] font-light leading-[1.08] tracking-tight text-white",
+                // Dos líneas para que el título quede a la izquierda de las joyas de la foto
+                slides[current].variant === "fiestas" && "max-w-[15ch] [text-wrap:balance]"
+              )}
+            >
               {slides[current].title}
             </h2>
             <p className="animate-fade-in-up delay-300 mb-8 max-w-[460px] text-[15px] leading-relaxed text-white/70">
@@ -111,7 +126,12 @@ export default function HeroSlider({ slides, festive = false }: HeroSliderProps)
             <div className="animate-fade-in-up delay-450">
               <Link
                 href={slides[current].href}
-                className="inline-flex items-center justify-center rounded-none border border-[var(--color-brand)] bg-[var(--color-brand)] px-9 py-3.5 text-[12px] font-semibold uppercase tracking-[0.18em] text-white transition-all hover:bg-[var(--color-brand-strong)] hover:border-[var(--color-brand-strong)]"
+                className={cn(
+                  "inline-flex min-h-11 items-center justify-center rounded-none border px-9 py-3.5 text-[12px] font-semibold uppercase tracking-[0.18em] transition-all focus-visible:outline-2 focus-visible:outline-offset-4",
+                  slides[current].variant === "fiestas"
+                    ? "border-[#dcc08a] bg-[#dcc08a] text-[#1a1208]! hover:border-[#f2e2bb] hover:bg-[#f2e2bb] focus-visible:outline-[#f2e2bb]"
+                    : "border-[var(--color-brand)] bg-[var(--color-brand)] text-white hover:border-[var(--color-brand-strong)] hover:bg-[var(--color-brand-strong)] focus-visible:outline-white"
+                )}
               >
                 {slides[current].buttonLabel ?? "Ver colección"}
               </Link>

@@ -262,3 +262,22 @@ h1, h2, h3, h4 {
     animation: none !important;
   }
 }
+
+/* Fiestas: enlace «Destacados» del menú. La estrella gira una punta al pasar el mouse
+   y brilla apenas cada tanto, sin distraer del resto del menú. */
+@keyframes nav-destello {
+  0%, 86%, 100% { filter: brightness(1); }
+  92% { filter: brightness(1.35) drop-shadow(0 0 4px rgba(242, 226, 187, 0.7)); }
+}
+.nav-estrella {
+  display: inline-block;
+  animation: nav-destello 6s ease-in-out infinite;
+  transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.nav-fiestas:hover .nav-estrella,
+.nav-fiestas:focus-visible .nav-estrella {
+  transform: rotate(72deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-estrella { animation: none; transition: none; }
+}

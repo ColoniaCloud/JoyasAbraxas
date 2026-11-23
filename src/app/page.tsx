@@ -39,6 +39,16 @@ const SLIDE_DATA: Record<string, { image: string; tagline: string; buttonLabel: 
   },
 };
 
+const SLIDE_FIESTAS: HeroSlide = {
+  image: "/ornament/slider/fiestas.jpg",
+  title: "En estas fiestas regala elegancia",
+  tagline: "Diez piezas de plata que elegimos para regalar estas Fiestas.",
+  href: "/destacados",
+  buttonLabel: "Productos destacados",
+  variant: "fiestas",
+  focus: "62% 50%",
+};
+
 const SLIDE_ORDER = ["anillos", "caravanas", "colgantes"];
 
 function buildSlides(categories: WPCategory[]): HeroSlide[] {
@@ -75,8 +85,8 @@ export default async function HomePage() {
     // Otro fallo — los slides usan href de fallback
   }
 
-  const slides = buildSlides(categories);
   const festive = isSeasonActive();
+  const slides = festive ? [SLIDE_FIESTAS, ...buildSlides(categories)] : buildSlides(categories);
 
   // Fetch products for each category in parallel
   const categoryProducts = await Promise.all(

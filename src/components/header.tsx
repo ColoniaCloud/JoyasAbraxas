@@ -10,8 +10,24 @@ import { ShoppingBag, User, Menu, X, ChevronDown, Search } from "lucide-react";
 import type { WPCategory } from "@/lib/types";
 import { useHideOnScroll } from "@/lib/hooks/use-hide-on-scroll";
 import GuirnaldaFiestas from "@/components/guirnalda-fiestas";
+import { estrellaSueltaSvg } from "@/lib/guirnalda-joyero";
 
-const NAV_LINKS = [
+interface NavLink {
+  href: string;
+  label: string;
+  /** Enlace de campaña de Fiestas: champagne con estrella facetada */
+  fiestas?: boolean;
+}
+
+const LINK_FIESTAS: NavLink = { href: "/destacados", label: "Destacados", fiestas: true };
+
+// Dos copias con ids distintos (menú de escritorio y de celular conviven en el DOM)
+const estrellaNav = (id: string) =>
+  estrellaSueltaSvg(id).replace('width="80" height="80"', 'width="100%" height="100%"');
+const ESTRELLA_ESCRITORIO = estrellaNav("nav-estrella-d");
+const ESTRELLA_CELULAR = estrellaNav("nav-estrella-m");
+
+const NAV_LINKS: NavLink[] = [
   { href: "/", label: "Home" },
   { href: "/nosotros", label: "Nosotros" },
   { href: "/sale", label: "Sale" },
@@ -28,6 +44,7 @@ interface HeaderProps {
 
 export default function Header({ categories = [], festive = false }: HeaderProps) {
   const pathname = usePathname();
+  const links = festive ? [NAV_LINKS[0], LINK_FIESTAS, ...NAV_LINKS.slice(1)] : NAV_LINKS;
   const router = useRouter();
   const { totalItems } = useCart();
   const promoBarVisible = useHideOnScroll();
@@ -92,9 +109,22 @@ export default function Header({ categories = [], festive = false }: HeaderProps
         {/* Right: nav + icons */}
         <div className="flex items-center gap-1">
           {/* Nav links (desktop only) */}
-          <ul className="mr-3 hidden list-none items-center gap-7 lg:flex">
-            {NAV_LINKS.map((link) => (
+          <ul className={cn("mr-3 hidden list-none items-center lg:flex", festive ? "gap-3 xl:gap-7" : "gap-7")}>
+            {links.map((link) => (
               <li key={link.href}>
+                {link.fiestas ? (
+                  <Link
+                    href={link.href}
+                    aria-current={pathname === link.href ? "page" : undefined}
+                    className={cn(
+                      "nav-fiestas group relative inline-flex items-center gap-1 text-[12px] font-medium uppercase tracking-[0.12em] text-[#dcc08a]! transition-colors hover:text-[#f2e2bb]!",
+                      pathname === link.href && "after:absolute after:-bottom-1.5 after:left-6 after:right-0 after:h-px after:bg-[#dcc08a]/70"
+                    )}
+                  >
+                    <span aria-hidden="true" className="nav-estrella -my-2 -ml-1 size-6 shrink-0" dangerouslySetInnerHTML={{ __html: ESTRELLA_ESCRITORIO }} />
+                    {link.label}
+                  </Link>
+                ) : (
                 <Link
                   href={link.href}
                   className={cn(
@@ -104,6 +134,7 @@ export default function Header({ categories = [], festive = false }: HeaderProps
                 >
                   {link.label}
                 </Link>
+                )}
               </li>
             ))}
 
@@ -267,18 +298,23 @@ export default function Header({ categories = [], festive = false }: HeaderProps
         )}
       >
         <ul className="flex list-none flex-col gap-1 px-5 py-4">
-          {NAV_LINKS.map((link) => (
+          {links.map((link) => (
             <li key={link.href}>
               <Link
                 href={link.href}
                 onClick={() => setMobileOpen(false)}
                 className={cn(
                   "block rounded-lg px-3 py-2.5 text-[13px] font-medium uppercase tracking-[0.12em] transition-colors",
-                  pathname === link.href
-                    ? "bg-[var(--color-brand)]/10 text-[var(--color-brand)]"
-                    : "text-[var(--color-ink)] hover:bg-[var(--color-line)]/50"
+                  link.fiestas
+                    ? cn("nav-fiestas group flex items-center gap-1.5 text-[#dcc08a]! hover:bg-[#dcc08a]/10", pathname === link.href && "bg-[#dcc08a]/10")
+                    : pathname === link.href
+                      ? "bg-[var(--color-brand)]/10 text-[var(--color-brand)]"
+                      : "text-[var(--color-ink)] hover:bg-[var(--color-line)]/50"
                 )}
               >
+                {link.fiestas && (
+                  <span aria-hidden="true" className="nav-estrella -my-2 -ml-1.5 size-7 shrink-0" dangerouslySetInnerHTML={{ __html: ESTRELLA_CELULAR }} />
+                )}
                 {link.label}
               </Link>
             </li>

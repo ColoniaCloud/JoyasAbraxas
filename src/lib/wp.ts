@@ -101,6 +101,14 @@ export async function fetchProducts({ perPage = 12, category, onSale, page = 1, 
 	return { data, totalPages, total };
 }
 
+/** Productos por id, en el mismo orden pedido (omite los que no estén publicados). */
+export async function fetchProductsByIds(ids: number[]) {
+	const path = `/wp-json/wc/v3/products?include=${ids.join(',')}&per_page=${ids.length}&status=publish`;
+	const response = await wpFetch(path, 1800);
+	const data = await readJson<WPProduct[]>(response, path);
+	return ids.flatMap((id) => data.filter((p) => p.id === id));
+}
+
 export async function fetchProduct(id: number) {
 	const product = await wcGet<WPProduct>(`/wp-json/wc/v3/products/${id}`, 900);
 	if (product.status !== 'publish') throw new Error('Producto no encontrado');
