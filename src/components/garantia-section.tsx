@@ -45,13 +45,19 @@ export default function GarantiaSection() {
     <section
       ref={ref}
       aria-labelledby="garantia-home-title"
-      className="relative w-full overflow-clip bg-[var(--color-background)] py-20 sm:py-24"
+      className="relative w-full overflow-clip bg-black py-20 sm:py-24"
     >
-      {/* Halo coral muy sutil detrás del número */}
-      <div
+      {/* Fondo: la misma foto del colgante, a sangre y bajo un velo muy oscuro */}
+      <Image
+        src="/ornament/slider/colgantes.jpg"
+        alt=""
         aria-hidden="true"
-        className="pointer-events-none absolute -left-40 top-1/2 size-[520px] -translate-y-1/2 rounded-full bg-[var(--color-brand)]/15 blur-[120px]"
+        fill
+        sizes="100vw"
+        className="object-cover object-[50%_45%]"
       />
+      <div aria-hidden="true" className="absolute inset-0 bg-black/85" />
+      <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent" />
       <div aria-hidden="true" className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[var(--color-line)] to-transparent" />
       <div aria-hidden="true" className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[var(--color-line)] to-transparent" />
 
