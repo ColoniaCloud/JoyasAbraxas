@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { Fragment } from "react";
+import GarantiaSection from "@/components/garantia-section";
 import { fetchProducts, fetchCategories, WpApiError } from "@/lib/wp";
 import type { WPProduct, WPCategory } from "@/lib/types";
 import HeroSlider, { type HeroSlide } from "@/components/hero-slider";
@@ -100,6 +102,12 @@ export default async function HomePage() {
     )
   );
 
+  const visibleCategories = categories
+    .map((cat, index) => ({ cat, index, products: categoryProducts[index] ?? [] }))
+    .filter(({ products }) => products.length > 0);
+  // La sección de garantía va entre los carruseles: después del segundo (o del último si hay menos).
+  const garantiaAfter = Math.min(1, visibleCategories.length - 1);
+
   return (
     <main className="-mt-36">
       <h1 className="sr-only">
@@ -107,13 +115,12 @@ export default async function HomePage() {
       </h1>
       <HeroSlider slides={slides} festive={festive} />
 
-      {categories.map((cat, i) => {
-        const products = categoryProducts[i] ?? [];
-        if (!products.length) return null;
-        return (
-          <CategorySection key={cat.id} cat={cat} products={products} index={i} festive={festive} />
-        );
-      })}
+      {visibleCategories.map(({ cat, products, index }, position) => (
+        <Fragment key={cat.id}>
+          <CategorySection cat={cat} products={products} index={index} festive={festive} />
+          {position === garantiaAfter && <GarantiaSection />}
+        </Fragment>
+      ))}
 
       {festive && <GuirnaldaSeparador />}
       <Testimonials />

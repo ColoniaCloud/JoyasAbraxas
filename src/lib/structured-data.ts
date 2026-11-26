@@ -142,7 +142,10 @@ export function productJsonLd(product: WPProduct, reviews: Review[] = []) {
 			returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnPeriod",
 			merchantReturnDays: 30,
 			returnMethod: "https://schema.org/ReturnByMail",
-			returnFees: "https://schema.org/FreeReturn",
+			// Política de /envios-y-devoluciones: solo cambios (no reintegro) y el envío
+			// del cambio lo paga el cliente, salvo fallas de fabricación.
+			returnFees: "https://schema.org/ReturnFeesCustomerResponsibility",
+			refundType: "https://schema.org/ExchangeRefund",
 		},
 	};
 
