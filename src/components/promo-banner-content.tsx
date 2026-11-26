@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { FREE_SHIPPING_THRESHOLD_LABEL } from "@/lib/shipping";
 
 /** Bloque visual compartido: texto sobre fondo rosa + foto. Usado por el modal y por el banner. */
 export default function PromoBannerContent({ priority = false }: { priority?: boolean }) {
@@ -26,7 +27,7 @@ export default function PromoBannerContent({ priority = false }: { priority?: bo
             Envíos gratis
           </p>
           <p className="m-0 mt-1 text-sm font-light text-white/90">
-            a todo el país en compras mayores a <span className="font-semibold">$3000</span>
+            a todo el país en compras mayores a <span className="font-semibold">{FREE_SHIPPING_THRESHOLD_LABEL}</span>
           </p>
         </div>
       </div>

@@ -1,4 +1,9 @@
 import type { Metadata } from "next";
+import {
+  FREE_SHIPPING_THRESHOLD_LABEL,
+  INTERIOR_SHIPPING_COST_LABEL,
+  MONTEVIDEO_SHIPPING_COST_LABEL,
+} from "@/lib/shipping";
 
 export const metadata: Metadata = {
   title: "Envíos y Devoluciones | Abraxas Joyería",
@@ -26,16 +31,15 @@ export default function EnviosYDevolucionesPage() {
             <li>
               <strong>Montevideo:</strong>
               <ul className="mt-1 list-circle pl-5 space-y-1 text-xs">
-                <li>Envíos por cadetería privada a domicilio: <strong>$200 a $400</strong> según la zona.</li>
-                <li><strong>Envío GRATIS</strong> en compras mayores a <strong>$3.000</strong> con entrega en un plazo máximo de <strong>24 horas</strong>.</li>
+                <li>Envíos por cadetería privada a domicilio: <strong>{MONTEVIDEO_SHIPPING_COST_LABEL}</strong>.</li>
+                <li><strong>Envío GRATIS</strong> en compras mayores a <strong>{FREE_SHIPPING_THRESHOLD_LABEL}</strong> con entrega en un plazo máximo de <strong>24 horas</strong>.</li>
               </ul>
             </li>
             <li>
               <strong>Interior del país:</strong>
               <ul className="mt-1 list-circle pl-5 space-y-1 text-xs">
-                <li>Despachados a través de DAC con un costo de envío de <strong>$280</strong>.</li>
-                <li>El despacho en Tres Cruces se realiza <strong>sin costo</strong> en un plazo máximo de <strong>48 horas</strong>.</li>
-                <li><strong>Envío GRATIS</strong> (costo de envío cubierto) en compras mayores a <strong>$3.000</strong>.</li>
+                <li>Despachados a través de DAC con un costo de envío de <strong>{INTERIOR_SHIPPING_COST_LABEL}</strong>, en un plazo máximo de <strong>48 horas</strong>.</li>
+                <li><strong>Envío GRATIS</strong> (costo de envío cubierto) en compras mayores a <strong>{FREE_SHIPPING_THRESHOLD_LABEL}</strong>.</li>
               </ul>
             </li>
           </ul>

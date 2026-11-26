@@ -1,4 +1,5 @@
 import type { CheckoutFormData, MPPreference, MPPayment } from "@/lib/types/checkout";
+import { quoteShipping } from "@/lib/shipping";
 
 const WP_URL = process.env.NEXT_PUBLIC_WP_URL!;
 const WC_KEY = process.env.WC_CONSUMER_KEY!;
@@ -42,6 +43,7 @@ export async function createWCOrder(
 			phone: customer.phone || "",
 			address_1: customer.address,
 			city: customer.city,
+			state: customer.state,
 			postcode: customer.postalCode || "",
 			country: "UY",
 		},
@@ -50,6 +52,7 @@ export async function createWCOrder(
 			last_name: customer.lastName,
 			address_1: customer.shippingAddress || customer.address,
 			city: customer.shippingCity || customer.city,
+			state: shippingState(customer),
 			postcode: customer.shippingPostalCode || customer.postalCode || "",
 			country: "UY",
 		},
@@ -82,20 +85,45 @@ export async function createWCOrder(
 		);
 	}
 
-	const order = (await res.json()) as { id: number; total: string };
+	const order = (await res.json()) as WCCreatedOrder;
 
-	if (isBankTransfer) {
-		return applyBankTransferDiscount(order.id, parseFloat(order.total));
-	}
-
-	return order;
+	return applyShippingAndDiscount(order, shippingState(customer), isBankTransfer);
 }
 
-/** Agrega una línea de descuento (fee negativo) al pedido ya creado, sobre el subtotal real calculado por WooCommerce. */
-async function applyBankTransferDiscount(orderId: number, subtotal: number) {
-	const discount = Math.round(subtotal * BANK_TRANSFER_DISCOUNT_RATE * 100) / 100;
+interface WCCreatedOrder {
+	id: number;
+	total: string;
+	line_items: { subtotal: string; subtotal_tax: string }[];
+}
 
-	const url = new URL(`/wp-json/wc/v3/orders/${orderId}`, WP_URL);
+/** Departamento de destino: el de la dirección de envío alternativa, o el de facturación. */
+function shippingState(customer: CheckoutFormData): string {
+	return customer.shippingAddress && customer.shippingState
+		? customer.shippingState
+		: customer.state;
+}
+
+/**
+ * Agrega al pedido ya creado la línea de envío y, si paga por transferencia, el
+ * descuento (fee negativo). Ambos se calculan sobre el subtotal de productos que
+ * calculó WooCommerce, nunca sobre precios enviados por el cliente. El descuento
+ * no alcanza al costo de envío.
+ */
+async function applyShippingAndDiscount(
+	order: WCCreatedOrder,
+	state: string,
+	isBankTransfer: boolean,
+) {
+	const productsSubtotal = order.line_items.reduce(
+		(sum, li) => sum + parseFloat(li.subtotal) + parseFloat(li.subtotal_tax || "0"),
+		0,
+	);
+	const shipping = quoteShipping(productsSubtotal, state);
+	const discount = isBankTransfer
+		? Math.round(productsSubtotal * BANK_TRANSFER_DISCOUNT_RATE * 100) / 100
+		: 0;
+
+	const url = new URL(`/wp-json/wc/v3/orders/${order.id}`, WP_URL);
 	url.searchParams.set("consumer_key", WC_KEY);
 	url.searchParams.set("consumer_secret", WC_SECRET);
 
@@ -103,19 +131,28 @@ async function applyBankTransferDiscount(orderId: number, subtotal: number) {
 		method: "PUT",
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify({
-			fee_lines: [
+			shipping_lines: [
 				{
-					name: "Descuento transferencia bancaria (10%)",
-					total: (-discount).toFixed(2),
+					method_id: shipping.methodId,
+					method_title: shipping.title,
+					total: shipping.cost.toFixed(2),
 				},
 			],
+			...(discount > 0 && {
+				fee_lines: [
+					{
+						name: "Descuento transferencia bancaria (10%)",
+						total: (-discount).toFixed(2),
+					},
+				],
+			}),
 		}),
 	});
 
 	if (!res.ok) {
 		const error = await res.json().catch(() => ({}));
 		throw new Error(
-			error.message || `Error aplicando descuento al pedido ${orderId}: ${res.status}`,
+			error.message || `Error agregando envío al pedido ${order.id}: ${res.status}`,
 		);
 	}
 

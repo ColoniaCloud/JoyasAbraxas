@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { CheckoutRequest } from "@/lib/types/checkout";
 import { createWCOrder, processMPPayment, updateWCOrderStatus } from "@/lib/services/checkout";
+import { isUruguayDepartment } from "@/lib/shipping";
 
 export async function POST(request: Request) {
 	try {
@@ -28,6 +29,16 @@ export async function POST(request: Request) {
 			);
 		}
 
+		if (
+			!isUruguayDepartment(body.customer.state) ||
+			(body.customer.shippingAddress && !isUruguayDepartment(body.customer.shippingState))
+		) {
+			return NextResponse.json(
+				{ error: "Elegí un departamento válido" },
+				{ status: 400 },
+			);
+		}
+
 		const paymentMethod = body.paymentMethod ?? "mercadopago";
 
 		// 1. Crear pedido en WooCommerce
@@ -42,7 +53,7 @@ export async function POST(request: Request) {
 			paymentMethod,
 		);
 
-		// 2a. Transferencia bancaria: devolver directamente (order.total ya incluye el 10% de descuento)
+		// 2a. Transferencia bancaria: devolver directamente (order.total ya incluye envío y el 10% de descuento)
 		if (paymentMethod === "bank_transfer") {
 			return NextResponse.json({
 				orderId: order.id,
@@ -59,10 +70,8 @@ export async function POST(request: Request) {
 			);
 		}
 
-		const totalAmount = body.items.reduce(
-			(sum, item) => sum + parseFloat(item.price) * item.quantity,
-			0,
-		);
+		// Se cobra el total calculado por WooCommerce (productos + envío), no precios del cliente.
+		const totalAmount = parseFloat(order.total);
 
 		const payment = await processMPPayment(
 			order.id,

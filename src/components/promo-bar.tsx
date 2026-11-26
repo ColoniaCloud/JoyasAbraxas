@@ -3,10 +3,11 @@
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useHideOnScroll } from "@/lib/hooks/use-hide-on-scroll";
+import { FREE_SHIPPING_THRESHOLD_LABEL } from "@/lib/shipping";
 
 const MESSAGES = [
   "10% OFF pagando con transferencia bancaria",
-  "Envíos gratis a todo el país en compras superiores a $3000",
+  `Envíos gratis a todo el país en compras superiores a ${FREE_SHIPPING_THRESHOLD_LABEL}`,
   "Garantía escrita en todos nuestros productos",
 ];
 

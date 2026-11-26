@@ -7,11 +7,14 @@ export interface CheckoutFormData {
 	phone?: string;
 	address: string;
 	city: string;
+	/** Departamento con código de WooCommerce (ej. "UY-MO") */
+	state: string;
 	postalCode?: string;
 	notes?: string;
 	// Dirección de envío alternativa (si difiere de la de contacto)
 	shippingAddress?: string;
 	shippingCity?: string;
+	shippingState?: string;
 	shippingPostalCode?: string;
 }
 

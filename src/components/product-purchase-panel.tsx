@@ -3,6 +3,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useCart } from "@/lib/cart-context";
 import { formatPrice } from "@/lib/utils";
+import {
+  FREE_SHIPPING_THRESHOLD_LABEL,
+  INTERIOR_SHIPPING_COST_LABEL,
+  MONTEVIDEO_SHIPPING_COST_LABEL,
+} from "@/lib/shipping";
 import { trackAddToCart } from "@/lib/analytics";
 import type {
   ProductCustomization,
@@ -514,17 +519,16 @@ export default function ProductPurchasePanel({
             <div className="pt-0">
               <h4 className="font-semibold text-[var(--color-ink)] mb-1">📍 Montevideo</h4>
               <ul className="list-disc pl-5 space-y-1.5">
-                <li>Envíos por cadetería privada a domicilio: <strong>$200 a $400</strong> según la zona.</li>
-                <li><strong>Envío GRATIS</strong> en compras mayores a <strong>$3.000</strong> con entrega en un plazo máximo de <strong>24 horas</strong>.</li>
+                <li>Envíos por cadetería privada a domicilio: <strong>{MONTEVIDEO_SHIPPING_COST_LABEL}</strong>.</li>
+                <li><strong>Envío GRATIS</strong> en compras mayores a <strong>{FREE_SHIPPING_THRESHOLD_LABEL}</strong> con entrega en un plazo máximo de <strong>24 horas</strong>.</li>
               </ul>
             </div>
 
             <div className="pt-3.5">
               <h4 className="font-semibold text-[var(--color-ink)] mb-1">🇺🇾 Interior del país</h4>
               <ul className="list-disc pl-5 space-y-1.5">
-                <li>Despacho por <strong>DAC sin costo de cadetería</strong> en Tres Cruces en un plazo de <strong>48 horas</strong> máximo.</li>
-                <li>El costo del envío de la agencia a cobrar en destino es de <strong>$280</strong>.</li>
-                <li><strong>Envío GRATIS</strong> (costo de agencia cubierto) en compras mayores a <strong>$3.000</strong>.</li>
+                <li>Despacho por <strong>DAC</strong> en un plazo de <strong>48 horas</strong> máximo, con un costo de envío de <strong>{INTERIOR_SHIPPING_COST_LABEL}</strong>.</li>
+                <li><strong>Envío GRATIS</strong> (costo de agencia cubierto) en compras mayores a <strong>{FREE_SHIPPING_THRESHOLD_LABEL}</strong>.</li>
               </ul>
             </div>
 

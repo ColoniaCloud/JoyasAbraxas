@@ -8,6 +8,7 @@ import type { CheckoutRequest, PaymentMethod } from "@/lib/types/checkout";
 import { Building2, CreditCard, LogIn, ShieldCheck, UserCheck } from "lucide-react";
 import PromoBanner from "@/components/promo-banner";
 import ShippingProgress from "@/components/shipping-progress";
+import { URUGUAY_DEPARTMENTS, quoteShipping } from "@/lib/shipping";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
@@ -27,6 +28,20 @@ interface StoredUser {
 // text-base (16px) en móvil evita el auto-zoom de iOS al enfocar; vuelve a 14px en ≥sm
 const INPUT = "rounded-[9px] border border-[var(--color-line)] p-2.5 font-[inherit] w-full bg-[var(--color-bg)] text-base sm:text-sm";
 
+function DepartmentSelect({ value, onChange }: { value: string; onChange: (code: string) => void }) {
+  return (
+    <label className="grid gap-1.5 text-sm font-semibold">
+      Departamento
+      <select required value={value} onChange={(e) => onChange(e.target.value)} className={INPUT}>
+        <option value="" disabled>Elegí…</option>
+        {URUGUAY_DEPARTMENTS.map((d) => (
+          <option key={d.code} value={d.code}>{d.name}</option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
 export default function CheckoutPage() {
   const { items, totalItems, totalPrice, clearCart } = useCart();
   const router = useRouter();
@@ -34,6 +49,8 @@ export default function CheckoutPage() {
   const [error, setError] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("mercadopago");
   const [shipToDifferent, setShipToDifferent] = useState(false);
+  const [billingState, setBillingState] = useState("");
+  const [altShippingState, setAltShippingState] = useState("");
   const [checkoutStep, setCheckoutStep] = useState<CheckoutStep>("form");
   const [pendingPayload, setPendingPayload] = useState<CheckoutRequest | null>(null);
 
@@ -118,11 +135,13 @@ export default function CheckoutPage() {
         phone: String(form.get("phone") || ""),
         address: String(form.get("address") || ""),
         city: String(form.get("city") || ""),
+        state: billingState,
         postalCode: String(form.get("postalCode") || ""),
         notes,
         ...(shipToDifferent && {
           shippingAddress: String(form.get("shippingAddress") || ""),
           shippingCity: String(form.get("shippingCity") || ""),
+          shippingState: altShippingState,
           shippingPostalCode: String(form.get("shippingPostalCode") || ""),
         }),
       },
@@ -192,8 +211,20 @@ export default function CheckoutPage() {
     await submitOrder({ ...pendingPayload, mpFormData });
   }
 
+  // El envío depende del departamento de destino; hasta que lo elija solo sabemos si es gratis.
+  const destinationState = shipToDifferent ? altShippingState : billingState;
+  const shipping = quoteShipping(totalPrice, destinationState);
+  const shippingKnown = shipping.free || destinationState !== "";
+  const shippingCost = shippingKnown ? shipping.cost : 0;
+  // El 10% por transferencia aplica solo a productos, no al envío (igual que en el pedido de WooCommerce).
   const bankDiscount = paymentMethod === "bank_transfer" ? totalPrice * 0.1 : 0;
-  const displayTotal = totalPrice - bankDiscount;
+  const displayTotal = totalPrice - bankDiscount + shippingCost;
+  const shippingRow = (
+    <div className="flex justify-between text-sm text-[var(--color-muted)]">
+      <span>Envío</span>
+      <span>{!shippingKnown ? "Elegí departamento" : shipping.free ? "Gratis" : formatPrice(shipping.cost)}</span>
+    </div>
+  );
 
   const [loggedFirst, loggedLast] = loggedUser
     ? [loggedUser.name.split(" ")[0] ?? "", loggedUser.name.split(" ").slice(1).join(" ")]
@@ -227,7 +258,7 @@ export default function CheckoutPage() {
             {loading ? (
               <div className="flex items-center justify-center py-12 text-[var(--color-muted)]">Procesando pago...</div>
             ) : (
-              <MercadoPagoBrick amount={totalPrice} onSubmit={handleBrickPayment} onError={(e) => setError(String(e))} />
+              <MercadoPagoBrick amount={totalPrice + shippingCost} onSubmit={handleBrickPayment} onError={(e) => setError(String(e))} />
             )}
           </section>
           <aside className="h-fit rounded-2xl border border-[var(--color-line)] bg-[var(--color-panel)] p-5">
@@ -247,7 +278,8 @@ export default function CheckoutPage() {
               ))}
             </div>
             <div className="flex justify-between pt-3 text-sm text-[var(--color-muted)]"><span>Productos ({totalItems})</span><span>{formatPrice(totalPrice)}</span></div>
-            <div className="mt-2 flex justify-between text-lg font-bold"><span>Total</span><span>{formatPrice(totalPrice)}</span></div>
+            {shippingRow}
+            <div className="mt-2 flex justify-between text-lg font-bold"><span>Total</span><span>{formatPrice(totalPrice + shippingCost)}</span></div>
             <ShippingProgress total={totalPrice} />
             <p className="mt-4 text-center text-xs text-[var(--color-muted)]">Pago seguro procesado por MercadoPago</p>
           </aside>
@@ -326,7 +358,8 @@ export default function CheckoutPage() {
                 <div className="mt-4 border-t border-[var(--color-line)] pt-4">
                   <p className="mb-3 text-sm font-semibold text-[var(--color-ink)]">Direccion</p>
                   <label className="grid gap-1.5 text-sm font-semibold">Calle y numero<input type="text" name="address" required className={INPUT} /></label>
-                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                  <div className="mt-3 grid gap-3 sm:grid-cols-3">
+                    <DepartmentSelect value={billingState} onChange={setBillingState} />
                     <label className="grid gap-1.5 text-sm font-semibold">Ciudad<input type="text" name="city" required className={INPUT} /></label>
                     <label className="grid gap-1.5 text-sm font-semibold">Codigo postal<input type="text" name="postalCode" className={INPUT} /></label>
                   </div>
@@ -341,7 +374,8 @@ export default function CheckoutPage() {
                   <div className="mt-4 rounded-xl border border-[var(--color-line)] bg-[var(--color-bg)] p-4">
                     <p className="mb-3 text-sm font-semibold text-[var(--color-ink)]">Direccion de envio</p>
                     <label className="grid gap-1.5 text-sm font-semibold">Calle y numero<input type="text" name="shippingAddress" required={shipToDifferent} className={INPUT} /></label>
-                    <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                    <div className="mt-3 grid gap-3 sm:grid-cols-3">
+                      <DepartmentSelect value={altShippingState} onChange={setAltShippingState} />
                       <label className="grid gap-1.5 text-sm font-semibold">Ciudad<input type="text" name="shippingCity" required={shipToDifferent} className={INPUT} /></label>
                       <label className="grid gap-1.5 text-sm font-semibold">Codigo postal<input type="text" name="shippingPostalCode" className={INPUT} /></label>
                     </div>
@@ -385,8 +419,9 @@ export default function CheckoutPage() {
           {bankDiscount > 0 && (
             <div className="flex justify-between text-sm text-[var(--color-brand)]"><span>Descuento transferencia (10%)</span><span>-{formatPrice(bankDiscount)}</span></div>
           )}
+          {shippingRow}
           <div className="mt-2 flex justify-between text-lg font-bold"><span>Total</span><span>{formatPrice(displayTotal)}</span></div>
-          <ShippingProgress total={displayTotal} />
+          <ShippingProgress total={totalPrice} />
           <button type="submit" form="checkout-form" disabled={loading || (!loggedUser && accountMode === "idle") || accountMode === "login"} className="mt-4 w-full cursor-pointer rounded-[9px] border-0 bg-[var(--color-brand)] p-3 font-[inherit] font-bold text-[#f6fffb] transition-colors hover:bg-[var(--color-brand-strong)] disabled:cursor-not-allowed disabled:opacity-50">
             {loading ? "Procesando..." : paymentMethod === "mercadopago" ? "Continuar al pago" : "Confirmar pedido"}
           </button>

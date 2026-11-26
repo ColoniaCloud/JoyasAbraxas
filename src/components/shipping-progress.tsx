@@ -1,8 +1,8 @@
 import { CheckCircle2, AlertTriangle } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
+import { FREE_SHIPPING_THRESHOLD } from "@/lib/shipping";
 
-export const FREE_SHIPPING_THRESHOLD = 3000;
-
+/** `total` es la suma de los productos sin el descuento por transferencia. */
 export default function ShippingProgress({ total }: { total: number }) {
   const remaining = FREE_SHIPPING_THRESHOLD - total;
   const qualifies = remaining <= 0;

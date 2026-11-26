@@ -1,5 +1,6 @@
 import type { WPProduct, WPPost } from "./types";
 import { summarizeReviews, type Review } from "./reviews";
+import { MONTEVIDEO_STATE, URUGUAY_DEPARTMENTS, quoteShipping } from "./shipping";
 
 const SITE_NAME = "Abraxas Joyería";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.joyasabraxas.com";
@@ -32,6 +33,31 @@ export function organizationJsonLd() {
 	};
 }
 
+function shippingDetail(rate: number, region: Record<string, unknown>) {
+	return {
+		"@type": "OfferShippingDetails",
+		shippingRate: { "@type": "MonetaryAmount", value: rate, currency: "UYU" },
+		shippingDestination: { "@type": "DefinedRegion", addressCountry: "UY", ...region },
+	};
+}
+
+/**
+ * Costo de envío de una unidad del producto, con las mismas reglas que el checkout
+ * (`quoteShipping`). Google espera `addressRegion` en ISO 3166-2 sin el prefijo del
+ * país ("MO"), por eso se recorta el código de WooCommerce ("UY-MO").
+ */
+function shippingDetailsJsonLd(unitPrice: number) {
+	if (quoteShipping(unitPrice, MONTEVIDEO_STATE).free) {
+		return shippingDetail(0, {});
+	}
+	const toIso = (code: string) => code.replace(/^UY-/, "");
+	const interior = URUGUAY_DEPARTMENTS.filter((d) => d.code !== MONTEVIDEO_STATE).map((d) => toIso(d.code));
+	return [
+		shippingDetail(quoteShipping(unitPrice, MONTEVIDEO_STATE).cost, { addressRegion: toIso(MONTEVIDEO_STATE) }),
+		shippingDetail(quoteShipping(unitPrice, "").cost, { addressRegion: interior }),
+	];
+}
+
 /**
  * `reviews` son las reseñas aprobadas reales. El aggregateRating sale de ellas y no
  * de `product.rating_count`: ese contador es una caché de WooCommerce que puede
@@ -49,18 +75,7 @@ export function productJsonLd(product: WPProduct, reviews: Review[] = []) {
 				? "https://schema.org/InStock"
 				: "https://schema.org/OutOfStock",
 		url: `${SITE_URL}/productos/${product.slug}`,
-		shippingDetails: {
-			"@type": "OfferShippingDetails",
-			shippingRate: {
-				"@type": "MonetaryAmount",
-				value: 0,
-				currency: "UYU",
-			},
-			shippingDestination: {
-				"@type": "DefinedRegion",
-				addressCountry: "UY",
-			},
-		},
+		shippingDetails: shippingDetailsJsonLd(parseFloat(product.price || "0")),
 		hasMerchantReturnPolicy: {
 			"@type": "MerchantReturnPolicy",
 			applicableCountry: "UY",
