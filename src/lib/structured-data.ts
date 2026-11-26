@@ -1,6 +1,16 @@
 import type { WPProduct, WPPost } from "./types";
 import { summarizeReviews, type Review } from "./reviews";
-import { MONTEVIDEO_STATE, URUGUAY_DEPARTMENTS, quoteShipping } from "./shipping";
+import {
+	FREE_SHIPPING_THRESHOLD,
+	FREE_SHIPPING_THRESHOLD_LABEL,
+	INTERIOR_SHIPPING_COST,
+	INTERIOR_SHIPPING_COST_LABEL,
+	MONTEVIDEO_SHIPPING_COST,
+	MONTEVIDEO_SHIPPING_COST_LABEL,
+	MONTEVIDEO_STATE,
+	URUGUAY_DEPARTMENTS,
+	quoteShipping,
+} from "./shipping";
 
 const SITE_NAME = "Abraxas Joyería";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.joyasabraxas.com";
@@ -29,6 +39,56 @@ export function organizationJsonLd() {
 		sameAs: [
 			"https://www.instagram.com/joyas.abraxas",
 			"https://www.facebook.com/people/Abraxas-Joyas/100063966942309/",
+		],
+		hasShippingService: storeShippingServiceJsonLd(),
+	};
+}
+
+const toIsoRegion = (code: string) => code.replace(/^UY-/, "");
+const INTERIOR_REGIONS = URUGUAY_DEPARTMENTS.filter((d) => d.code !== MONTEVIDEO_STATE).map((d) =>
+	toIsoRegion(d.code),
+);
+
+function shippingCondition(
+	regions: string | string[],
+	orderValue: { minValue: number; maxValue?: number },
+	rate: number,
+	transitDays: { min: number; max: number },
+) {
+	return {
+		"@type": "ShippingConditions",
+		shippingDestination: { "@type": "DefinedRegion", addressCountry: "UY", addressRegion: regions },
+		orderValue: { "@type": "MonetaryAmount", currency: "UYU", ...orderValue },
+		shippingRate: { "@type": "MonetaryAmount", value: rate, currency: "UYU" },
+		transitTime: {
+			"@type": "ServicePeriod",
+			duration: { "@type": "QuantitativeValue", minValue: transitDays.min, maxValue: transitDays.max, unitCode: "DAY" },
+		},
+	};
+}
+
+/**
+ * Política de envíos de la tienda (Organization > hasShippingService), con las
+ * mismas reglas que el checkout y WooCommerce (src/lib/shipping.ts):
+ * Montevideo $250 en hasta 24 h, interior $350 por DAC en hasta 48 h,
+ * gratis desde $6.000 de compra.
+ */
+function storeShippingServiceJsonLd() {
+	const paid = { minValue: 0, maxValue: FREE_SHIPPING_THRESHOLD - 0.01 };
+	const free = { minValue: FREE_SHIPPING_THRESHOLD };
+	const montevideo = toIsoRegion(MONTEVIDEO_STATE);
+	const sameDay = { min: 0, max: 1 };
+	const twoDays = { min: 1, max: 2 };
+	return {
+		"@type": "ShippingService",
+		name: "Envíos a todo Uruguay",
+		description: `Montevideo ${MONTEVIDEO_SHIPPING_COST_LABEL} (hasta 24 h), interior ${INTERIOR_SHIPPING_COST_LABEL} por DAC (hasta 48 h). Gratis en compras desde ${FREE_SHIPPING_THRESHOLD_LABEL}.`,
+		fulfillmentType: "https://schema.org/FulfillmentTypeDelivery",
+		shippingConditions: [
+			shippingCondition(montevideo, paid, MONTEVIDEO_SHIPPING_COST, sameDay),
+			shippingCondition(montevideo, free, 0, sameDay),
+			shippingCondition(INTERIOR_REGIONS, paid, INTERIOR_SHIPPING_COST, twoDays),
+			shippingCondition(INTERIOR_REGIONS, free, 0, twoDays),
 		],
 	};
 }
