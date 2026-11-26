@@ -44,7 +44,7 @@ const SLIDE_DATA: Record<string, { image: string; tagline: string; buttonLabel: 
 const SLIDE_FIESTAS: HeroSlide = {
   image: "/ornament/slider/fiestas.jpg",
   title: "En estas fiestas regala elegancia",
-  tagline: "Diez piezas de plata que elegimos para regalar estas Fiestas.",
+  tagline: "Mirá nuestra selección de piezas ideales para regalar algo especial en Navidad.",
   href: "/destacados",
   buttonLabel: "Productos destacados",
   variant: "fiestas",

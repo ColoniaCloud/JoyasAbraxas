@@ -69,7 +69,13 @@ export default function HeroSlider({ slides, festive = false }: HeroSliderProps)
 
   return (
     <section
-      className="relative h-[70vh] min-h-[480px] w-full touch-pan-y overflow-clip bg-black md:h-[60vh] md:min-h-[400px]"
+      className={cn(
+        "relative w-full touch-pan-y overflow-clip bg-black",
+        // Con la guirnalda de Fiestas el hero crece a 85vh para que la decoración no pise el texto del slide.
+        festive
+          ? "h-[85vh] min-h-[560px]"
+          : "h-[70vh] min-h-[480px] md:h-[60vh] md:min-h-[400px]",
+      )}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >
