@@ -45,7 +45,7 @@ const SLIDE_FIESTAS: HeroSlide = {
   image: "/ornament/slider/fiestas.jpg",
   title: "En estas fiestas regala elegancia",
   tagline: "Mirá nuestra selección de piezas ideales para regalar algo especial en Navidad.",
-  href: "/destacados",
+  href: "/navidad",
   buttonLabel: "Productos destacados",
   variant: "fiestas",
   focus: "62% 50%",

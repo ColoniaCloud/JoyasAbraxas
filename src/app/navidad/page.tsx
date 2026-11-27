@@ -5,16 +5,17 @@ import { fetchProductsByIds, WpApiError } from "@/lib/wp";
 import type { WPProduct } from "@/lib/types";
 import { cn, formatPrice } from "@/lib/utils";
 import { estrellaSueltaSvg } from "@/lib/guirnalda-joyero";
+import NavidadEscena from "@/components/navidad-escena";
 
 export const metadata: Metadata = {
   title: "Productos destacados de Fiestas | Abraxas Joyería",
   description:
     "Diez piezas de plata elegidas para regalar estas Fiestas: colgantes, anillos, caravanas y brazaletes artesanales.",
-  alternates: { canonical: "/destacados" },
+  alternates: { canonical: "/navidad" },
   openGraph: {
     title: "Productos destacados de Fiestas | Abraxas Joyería",
     description: "Diez piezas de plata elegidas para regalar estas Fiestas.",
-    url: "/destacados",
+    url: "/navidad",
   },
 };
 
@@ -45,7 +46,7 @@ function Pieza({ product, destacado }: { product: WPProduct; destacado?: boolean
     <Link
       href={`/productos/${product.slug}`}
       className={cn(
-        "group relative flex flex-col overflow-hidden rounded-xl border border-[#dcc08a]/15 bg-[var(--color-panel)] transition-colors duration-300 hover:border-[#dcc08a]/55 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#dcc08a]",
+        "group relative flex flex-col overflow-hidden rounded-xl border border-[#dcc08a]/15 bg-[#12301f] transition-colors duration-300 hover:border-[#dcc08a]/55 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#dcc08a]",
         destacado && "col-span-2 md:row-span-2"
       )}
     >
@@ -79,7 +80,7 @@ function Pieza({ product, destacado }: { product: WPProduct; destacado?: boolean
           {product.name}
         </p>
         <p className="m-0 flex items-baseline gap-2">
-          <span className={cn("font-semibold text-[#dcc08a]", destacado ? "text-lg" : "text-base")}>
+          <span className={cn("font-semibold text-[var(--color-brand-strong)]", destacado ? "text-lg" : "text-base")}>
             {product.type === "variable" && "Desde "}
             {formatPrice(enOferta ? product.sale_price : product.price)}
           </span>
@@ -103,8 +104,11 @@ export default async function DestacadosPage() {
   const destacado = new Set(SELECCION.filter((s) => s.destacado).map((s) => s.id));
 
   return (
-    <main className="mx-auto max-w-[1200px] px-5 pb-20 pt-16 md:px-6 md:pt-24">
-      <header className="mx-auto mb-12 max-w-[640px] text-center md:mb-16">
+    <main>
+      <NavidadEscena>
+      <div className="mx-auto max-w-[1200px] px-5 pb-20 md:px-6">
+      {/* Hero alto: deja aire bajo la guirnalda para que las estrellas colgantes no tapen el título */}
+      <header className="mx-auto flex min-h-[54svh] max-w-[640px] flex-col items-center justify-end pb-14 pt-40 text-center md:min-h-[62svh] md:pb-20 md:pt-48">
         <h1 className="m-0 font-[family-name:var(--font-heading)] text-[clamp(2.5rem,6vw,4.25rem)] font-light leading-[1.05] tracking-[-0.01em] text-[var(--color-ink)]">
           Productos destacados
         </h1>
@@ -142,6 +146,8 @@ export default async function DestacadosPage() {
           Ver todas las categorías
         </Link>
       </div>
+      </div>
+      </NavidadEscena>
     </main>
   );
 }

@@ -5,8 +5,8 @@ const nextConfig: NextConfig = {
   outputFileTracingRoot: path.join(__dirname),
   async redirects() {
     return [
-      // URL corta de la campaña de Navidad (redes) → selección de regalos. Temporal: cambia cada temporada.
-      { source: "/navidad", destination: "/destacados", permanent: false },
+      // La página de regalos vivía en /destacados: los enlaces viejos siguen funcionando.
+      { source: "/destacados", destination: "/navidad", permanent: false },
     ];
   },
   images: {

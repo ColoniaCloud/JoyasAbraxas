@@ -37,3 +37,4 @@ sesion-*.md
 
 # Datos privados (emails de clientes, backups). Nunca versionar
 datos-privados/
+.vercel

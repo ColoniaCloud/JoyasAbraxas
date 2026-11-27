@@ -19,7 +19,7 @@ interface NavLink {
   fiestas?: boolean;
 }
 
-const LINK_FIESTAS: NavLink = { href: "/destacados", label: "Destacados", fiestas: true };
+const LINK_FIESTAS: NavLink = { href: "/navidad", label: "Navidad", fiestas: true };
 
 // Dos copias con ids distintos (menú de escritorio y de celular conviven en el DOM)
 const estrellaNav = (id: string) =>
@@ -30,7 +30,6 @@ const ESTRELLA_CELULAR = estrellaNav("nav-estrella-m");
 const NAV_LINKS: NavLink[] = [
   { href: "/", label: "Home" },
   { href: "/nosotros", label: "Nosotros" },
-  { href: "/sale", label: "Sale" },
   { href: "/blog", label: "Blog" },
   { href: "/garantia", label: "Garantías" },
   { href: "/contacto", label: "Contacto" },
@@ -80,7 +79,11 @@ export default function Header({ categories = [], festive = false }: HeaderProps
   return (
     <header
       className={cn(
-        "fixed left-1/2 z-50 w-[calc(100%-2rem)] max-w-[1200px] -translate-x-1/2 rounded-2xl border border-[var(--color-line)] bg-[var(--color-panel)]/80 shadow-[0_8px_40px_rgba(0,0,0,0.5)] backdrop-blur-xl transition-[top] duration-500 ease-out",
+        "fixed left-1/2 z-50 w-[calc(100%-2rem)] max-w-[1200px] -translate-x-1/2 rounded-2xl border shadow-[0_8px_40px_rgba(0,0,0,0.5)] backdrop-blur-xl transition-[top] duration-500 ease-out",
+        // En /navidad el panel toma el verde de la escena en lugar del negro
+        pathname === "/navidad"
+          ? "border-[#dcc08a]/15 bg-[#0f2a1e]/70"
+          : "border-[var(--color-line)] bg-[var(--color-panel)]/80",
         promoBarVisible ? "top-[52px]" : "top-4"
       )}
     >
@@ -111,7 +114,7 @@ export default function Header({ categories = [], festive = false }: HeaderProps
           {/* Nav links (desktop only) */}
           <ul className={cn("mr-3 hidden list-none items-center lg:flex", festive ? "gap-3 xl:gap-7" : "gap-7")}>
             {links.map((link) => (
-              <li key={link.href}>
+              <li key={link.href} className="flex items-center">
                 {link.fiestas ? (
                   <Link
                     href={link.href}

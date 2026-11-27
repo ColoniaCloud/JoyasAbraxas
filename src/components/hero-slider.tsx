@@ -100,10 +100,15 @@ export default function HeroSlider({ slides, festive = false }: HeroSliderProps)
             priority={i === 0}
             sizes="100vw"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/35 to-black/15" />
-          {slide.variant === "fiestas" && (
-            // Velo a la izquierda para que el título no compita con las joyas de la foto
-            <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent md:via-black/25" />
+          {slide.variant === "fiestas" ? (
+            <>
+              {/* Velo verde pino (el de la página /navidad) en lugar del negro */}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0f2a1e]/85 via-[#0f2a1e]/45 to-[#0f2a1e]/25" />
+              {/* Velo a la izquierda para que el título no compita con las joyas de la foto */}
+              <div className="absolute inset-0 bg-gradient-to-r from-[#0f2a1e]/85 via-[#0f2a1e]/45 to-transparent md:via-[#0f2a1e]/30" />
+            </>
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/35 to-black/15" />
           )}
         </div>
       ))}
@@ -135,7 +140,7 @@ export default function HeroSlider({ slides, festive = false }: HeroSliderProps)
                 className={cn(
                   "inline-flex min-h-11 items-center justify-center rounded-none border px-9 py-3.5 text-[12px] font-semibold uppercase tracking-[0.18em] transition-all focus-visible:outline-2 focus-visible:outline-offset-4",
                   slides[current].variant === "fiestas"
-                    ? "border-[#dcc08a] bg-[#dcc08a] text-[#1a1208]! hover:border-[#f2e2bb] hover:bg-[#f2e2bb] focus-visible:outline-[#f2e2bb]"
+                    ? "border-[#dcc08a]/70 bg-[#1e6b45] text-white! hover:border-[#dcc08a] hover:bg-[#258253] focus-visible:outline-[#f2e2bb]"
                     : "border-[var(--color-brand)] bg-[var(--color-brand)] text-white hover:border-[var(--color-brand-strong)] hover:bg-[var(--color-brand-strong)] focus-visible:outline-white"
                 )}
               >
